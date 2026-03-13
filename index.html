@@ -124,7 +124,7 @@
     <script>
         // ==========================================
         // KONFIGURASI PENTING UNTUK GITHUB / VERCEL
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzICTc-tZtXmagJpZ5kSD-KcdhftpbSqziqzpUIOBsJdYz2JuEP31VGZUbpCQv7CjtQ/exec';
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxgyLFyMA6F3ICRV-EHSWLOXpGZx52v75up4mdOEHkrdynmsZbTb4dTjmexSd7MjX5W/exec';
         // ==========================================
 
         let appState = {
@@ -650,9 +650,6 @@
                 const res = await fetchAPI('saveArticle', { data: articleData });
                 if (res && res.id) {
                     appState.articles.unshift(res);
-                    if (res.warning) {
-                        alert('⚠️ Artikel tersimpan, tapi: ' + res.warning);
-                    }
                     switchCpanelTab('artikel');
                 } else {
                     alert('Gagal menyimpan artikel. Cek koneksi ke Apps Script.');
@@ -691,9 +688,6 @@
                 const res = await fetchAPI('saveDocument', { data: docData });
                 if(res && res.id) {
                     appState.documents.unshift(res);
-                    if (res.warning) {
-                        alert('⚠️ Dokumen tersimpan, tapi: ' + res.warning);
-                    }
                     switchCpanelTab('dokumen');
                 } else {
                     alert('Gagal mengupload dokumen. Cek koneksi ke Apps Script.');
