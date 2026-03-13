@@ -143,7 +143,7 @@
 
         // --- Fetch API Wrapper ---
         async function fetchAPI(action, payload = null) {
-            if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'https://script.google.com/macros/s/AKfycby7jgmLw2kNamtTI4kJCbDt8jUFkSKUJpfJQHcoILLsCj9HKjJNaRQeeii1oGSDz1er/exec') {
+            if (!APPS_SCRIPT_URL) {
                 console.warn("Apps Script URL belum diatur!"); return null;
             }
             try {
@@ -399,6 +399,9 @@
         }
 
         function switchCpanelTab(tab) {
+            // Reset Quill instances agar bisa re-initialize di DOM baru setelah tab switch
+            quillEditor = null;
+            quillInfoEditor = null;
             ['artikel', 'dokumen', 'kategori', 'halaman-info', 'pengaturan'].forEach(t => {
                 const btn = document.getElementById(`tab-btn-${t}`);
                 if(btn) {
@@ -426,7 +429,7 @@
             `).join('');
 
             content.innerHTML = `
-                <div class="flex justify-between items-center mb-6"><h2 class="text-xl md:text-2xl font-bold text-primary">Kelola Artikel</h2><button onclick="document.getElementById('article-list-container').classList.add('hide'); document.getElementById('article-editor-container').classList.remove('hide'); if(!quillEditor) quillEditor = new Quill('#editor-container', { theme: 'snow', modules: { toolbar: [ [{ 'header': [1, 2, 3, false] }], ['bold', 'italic', 'underline'], [{ 'list': 'ordered'}, { 'list': 'bullet' }], ['link'], ['clean'] ] } });" class="bg-secondary text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center justify-center hover:bg-blue-600"><i class="ph ph-plus mr-2"></i> Tulis Artikel</button></div>
+                <div class="flex justify-between items-center mb-6"><h2 class="text-xl md:text-2xl font-bold text-primary">Kelola Artikel</h2><button onclick="document.getElementById('article-list-container').classList.add('hide'); document.getElementById('article-editor-container').classList.remove('hide'); quillEditor = new Quill('#editor-container', { theme: 'snow', modules: { toolbar: [ [{ 'header': [1, 2, 3, false] }], ['bold', 'italic', 'underline'], [{ 'list': 'ordered'}, { 'list': 'bullet' }], ['link'], ['clean'] ] } });" class="bg-secondary text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center justify-center hover:bg-blue-600"><i class="ph ph-plus mr-2"></i> Tulis Artikel</button></div>
                 <div id="article-list-container" class="border border-slate-100 rounded-xl overflow-hidden">${listHtml || '<div class="p-4 text-center text-slate-500 text-sm">Belum ada artikel.</div>'}</div>
                 <div id="article-editor-container" class="hide mt-6 border-t border-slate-100 pt-6">
                     <h3 class="text-lg font-bold mb-4">Buat Artikel Baru</h3>
@@ -530,12 +533,17 @@
                 </div>
             `;
             if (!quillInfoEditor) {
-                quillInfoEditor = new Quill('#info-editor-container', { 
-                    theme: 'snow', 
-                    modules: { toolbar: [ [{ 'header': [1, 2, 3, false] }], ['bold', 'italic', 'underline'], [{ 'list': 'ordered'}, { 'list': 'bullet' }], ['link'], ['clean'] ] } 
-                });
+                // Gunakan setTimeout agar DOM sudah siap sebelum Quill di-mount
+                setTimeout(() => {
+                    quillInfoEditor = new Quill('#info-editor-container', { 
+                        theme: 'snow', 
+                        modules: { toolbar: [ [{ 'header': [1, 2, 3, false] }], ['bold', 'italic', 'underline'], [{ 'list': 'ordered'}, { 'list': 'bullet' }], ['link'], ['clean'] ] } 
+                    });
+                    loadInfoPageEditor(document.getElementById('select-info-page').value);
+                }, 0);
+            } else {
+                loadInfoPageEditor('privacyPolicy');
             }
-            loadInfoPageEditor('privacyPolicy');
         }
 
         function loadInfoPageEditor(pageKey) {
@@ -629,8 +637,11 @@
                 const res = await fetchAPI('saveArticle', { data: articleData });
                 if (res && res.id) {
                     appState.articles.unshift(res);
+                    switchCpanelTab('artikel');
+                } else {
+                    alert('Gagal menyimpan artikel. Cek koneksi ke Apps Script.');
+                    btn.innerText = 'Publikasikan'; btn.disabled = false;
                 }
-                switchCpanelTab('artikel');
             };
 
             if (fileInput.files.length > 0) {
@@ -664,9 +675,13 @@
                 const res = await fetchAPI('saveDocument', { data: docData });
                 if(res && res.id) {
                     appState.documents.unshift(res);
+                    switchCpanelTab('dokumen');
+                } else {
+                    alert('Gagal mengupload dokumen. Cek koneksi ke Apps Script.');
+                    btn.innerText = 'Upload Dokumen'; btn.disabled = false;
                 }
-                switchCpanelTab('dokumen');
             };
+            reader.onerror = () => { alert('Gagal membaca file.'); btn.innerText = 'Upload Dokumen'; btn.disabled = false; };
             reader.readAsDataURL(fileInput.files[0]);
         }
 
