@@ -114,7 +114,7 @@
 
 <script>
 // ==========================================
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxcHmNhP3HxSOosKzQuf6LVkhtQiTEY7kDxQz_veuIZvCd0sWXiWyQ8ONuUPqSvmJ6E/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby-dU18J8U9x7X3XZ2egNKG-MNGG98gAntmRaLdcpi6nJ9sycHQ7rMi2efojJkJ2z2f/exec';
 // ==========================================
 
 const DOC_CATEGORIES = ['Pedoman/SOP', 'Surat Edaran', 'Instruksi Kerja', 'Dokumen Penting Lainnya'];
@@ -174,18 +174,41 @@ function makeQuillModules() {
             ],
             handlers: {
                 image: function () {
+                    const quill = this.quill;
                     const input = document.createElement('input');
                     input.setAttribute('type', 'file');
                     input.setAttribute('accept', 'image/*');
                     input.click();
-                    input.onchange = () => {
+                    input.onchange = async () => {
                         const file = input.files[0];
                         if (!file) return;
+
+                        // Tampilkan placeholder loading di posisi kursor
+                        const range = quill.getSelection(true);
+                        quill.insertText(range.index, '⏳ Mengupload gambar...', { 'color': '#94a3b8', 'italic': true });
+                        quill.setSelection(range.index + 26);
+
                         const reader = new FileReader();
-                        reader.onload = (e) => {
-                            const range = this.quill.getSelection(true);
-                            this.quill.insertEmbed(range.index, 'image', e.target.result);
-                            this.quill.setSelection(range.index + 1);
+                        reader.onload = async (e) => {
+                            const base64 = e.target.result.split(',')[1];
+                            const res = await fetchAPI('uploadImage', {
+                                data: { imageBase64: base64, mimeType: file.type, filename: 'inline_' + Date.now() + '_' + file.name }
+                            });
+
+                            // Hapus teks placeholder
+                            const currentContent = quill.getText();
+                            const placeholderIdx = currentContent.indexOf('⏳ Mengupload gambar...');
+                            if (placeholderIdx !== -1) {
+                                quill.deleteText(placeholderIdx, 26);
+                            }
+
+                            if (res && res.url) {
+                                const insertAt = placeholderIdx !== -1 ? placeholderIdx : quill.getSelection(true).index;
+                                quill.insertEmbed(insertAt, 'image', res.url);
+                                quill.setSelection(insertAt + 1);
+                            } else {
+                                alert('Gagal mengupload gambar ke server.');
+                            }
                         };
                         reader.readAsDataURL(file);
                     };
