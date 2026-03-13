@@ -1,0 +1,320 @@
+const SPREADSHEET_ID = '1Q5W5iq0yh2kzzXgNByVZllCvGRfwMkiS3Seytdr2J0M'; 
+const FOLDER_ID = '1WZ1YMVLdgpjO7R4OBxA-7y_--DI3fviN'; 
+
+// ============================================================
+// Jalankan fungsi ini SEKALI dari Editor sebelum deploy
+// (Run > authorizeAllServices) agar semua scope OAuth aktif.
+// ============================================================
+function authorizeAllServices() {
+  SpreadsheetApp.openById(SPREADSHEET_ID);
+  DriveApp.getFolderById(FOLDER_ID);
+  Logger.log('Semua service berhasil diotorisasi!');
+}
+
+// Format tanggal ke DD-MMMM-YYYY HH:MM (Bahasa Indonesia)
+function formatDate(val) {
+  if (!val) return '-';
+  const BULAN = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  const d = (val instanceof Date) ? val : new Date(val);
+  if (isNaN(d.getTime())) return val.toString();
+  const dd   = String(d.getDate()).padStart(2, '0');
+  const mmm  = BULAN[d.getMonth()];
+  const yyyy = d.getFullYear();
+  const hh   = String(d.getHours()).padStart(2, '0');
+  const min  = String(d.getMinutes()).padStart(2, '0');
+  return dd + '-' + mmm + '-' + yyyy + ' ' + hh + ':' + min;
+}
+
+function doGet(e) {
+  if (e && e.parameter && e.parameter.action === 'getInitialData') {
+    return ContentService.createTextOutput(JSON.stringify(getInitialData()))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  return ContentService.createTextOutput("API is Running.");
+}
+
+function doPost(e) {
+  try {
+    if (!e.postData || !e.postData.contents) {
+      return ContentService.createTextOutput(JSON.stringify({ error: "Tidak ada data" })).setMimeType(ContentService.MimeType.JSON);
+    }
+    const payload = JSON.parse(e.postData.contents);
+    const action = payload.action;
+    let result = {};
+
+    if      (action === 'saveArticle')         result = saveArticleToDB(payload.data);
+    else if (action === 'updateArticle')        result = updateArticleToDB(payload.data);
+    else if (action === 'deleteArticle')        result = { success: deleteArticleDB(payload.id) };
+    else if (action === 'uploadImage')          result = uploadImageToDrive(payload.data);
+    else if (action === 'saveDocument')         result = saveDocumentToDB(payload.data);
+    else if (action === 'deleteDocument')       result = { success: deleteDocumentDB(payload.id) };
+    else if (action === 'saveSetting')          result = { success: saveSettingToDB(payload.key, payload.value) };
+    else if (action === 'saveMultipleSettings') result = { success: saveMultipleSettingsToDB(payload.settings) };
+    else if (action === 'saveUser')             result = saveUserToDB(payload.data);
+    else if (action === 'deleteUser')           result = { success: deleteUserDB(payload.id) };
+    else result = { error: 'Action tidak dikenal: ' + action };
+
+    return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ error: err.message })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function getInitialData() {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+
+  // 1. Articles
+  let sheetArticles = ss.getSheetByName('Articles');
+  if (!sheetArticles) {
+    sheetArticles = ss.insertSheet('Articles');
+    sheetArticles.appendRow(['ID', 'Title', 'ImageURL', 'Excerpt', 'Content', 'Date', 'Type']);
+  }
+  let articles = [];
+  const dataA = sheetArticles.getDataRange().getValues();
+  for (let i = 1; i < dataA.length; i++) {
+    articles.unshift({
+      id: dataA[i][0], title: dataA[i][1], image: dataA[i][2],
+      excerpt: dataA[i][3], content: dataA[i][4],
+      date: formatDate(dataA[i][5]), type: dataA[i][6] || 'Informasi'
+    });
+  }
+
+  // 2. Documents (col 8 = category)
+  let sheetDocs = ss.getSheetByName('Documents');
+  if (!sheetDocs) {
+    sheetDocs = ss.insertSheet('Documents');
+    sheetDocs.appendRow(['ID', 'Title', 'Desc', 'Icon', 'Color', 'FileURL', 'Date', 'Category']);
+  }
+  let documents = [];
+  const dataD = sheetDocs.getDataRange().getValues();
+  for (let i = 1; i < dataD.length; i++) {
+    documents.unshift({
+      id: dataD[i][0], title: dataD[i][1], desc: dataD[i][2],
+      icon: dataD[i][3], color: dataD[i][4], fileUrl: dataD[i][5],
+      date: formatDate(dataD[i][6]),
+      category: dataD[i][7] || 'Dokumen Penting Lainnya'
+    });
+  }
+
+  // 3. Settings
+  let sheetSettings = ss.getSheetByName('Settings');
+  if (!sheetSettings) {
+    sheetSettings = ss.insertSheet('Settings');
+    sheetSettings.appendRow(['Key', 'Value']);
+  }
+  let settingsMap = {
+    runningText: "Selamat Datang di Portal GENETIC",
+    categories_data: null,
+    footerWA: "081234567890",
+    footerEmail: "helpdesk@genetic.com",
+    footerCopyright: "© 2026 GENETIC (General Affairs). All rights reserved.",
+    privacyPolicy: "<p>Kebijakan Privasi perusahaan akan ditampilkan di sini.</p>",
+    termsOfUse: "<p>Syarat dan Ketentuan layanan akan ditampilkan di sini.</p>"
+  };
+  const dataS = sheetSettings.getDataRange().getValues();
+  for (let i = 1; i < dataS.length; i++) {
+    const key = dataS[i][0], value = dataS[i][1];
+    if (key in settingsMap || key === 'categories_data') {
+      if (key === 'categories_data') { try { settingsMap[key] = JSON.parse(value); } catch(e) {} }
+      else settingsMap[key] = value;
+    }
+  }
+  if (!settingsMap.categories_data) {
+    settingsMap.categories_data = [
+      { id: 1, name: 'Kategori A', subs: [{ name: 'Sub A1', url: '#' }] },
+      { id: 2, name: 'Kategori B', subs: [] }
+    ];
+  }
+
+  // 4. Users
+  let sheetUsers = ss.getSheetByName('Users');
+  if (!sheetUsers) {
+    sheetUsers = ss.insertSheet('Users');
+    sheetUsers.appendRow(['ID', 'DisplayName', 'Username', 'Password', 'Role']);
+    // Seed default users
+    sheetUsers.appendRow([1, 'Master Admin', 'general00', '00general', 'master']);
+    sheetUsers.appendRow([2, 'Admin 1', 'general01', '01general', 'admin']);
+    sheetUsers.appendRow([3, 'Admin 2', 'general02', '02general', 'admin']);
+  }
+  let users = [];
+  const dataU = sheetUsers.getDataRange().getValues();
+  for (let i = 1; i < dataU.length; i++) {
+    users.push({
+      id: dataU[i][0], displayName: dataU[i][1], username: dataU[i][2],
+      password: dataU[i][3], role: dataU[i][4]
+    });
+  }
+
+  return {
+    articles, documents, users,
+    runningText: settingsMap.runningText,
+    categories: settingsMap.categories_data,
+    footerWA: settingsMap.footerWA,
+    footerEmail: settingsMap.footerEmail,
+    footerCopyright: settingsMap.footerCopyright,
+    privacyPolicy: settingsMap.privacyPolicy,
+    termsOfUse: settingsMap.termsOfUse
+  };
+}
+
+// Upload gambar inline dari editor ke Drive, kembalikan URL thumbnail
+function uploadImageToDrive(data) {
+  try {
+    const file = uploadFileToDrive(data.imageBase64, data.mimeType, data.filename);
+    const url = 'https://drive.google.com/thumbnail?id=' + file.getId() + '&sz=w1200';
+    return { url: url };
+  } catch (err) {
+    return { error: 'Gagal upload gambar: ' + err.message };
+  }
+}
+
+// Helper: Upload file ke Drive, setSharing non-fatal
+function uploadFileToDrive(base64Data, mimeType, filename) {
+  const folder = DriveApp.getFolderById(FOLDER_ID);
+  const blob = Utilities.newBlob(Utilities.base64Decode(base64Data), mimeType, filename);
+  const file = folder.createFile(blob);
+  try { file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); }
+  catch (sharingErr) { Logger.log('setSharing non-fatal: ' + sharingErr.message); }
+  return file;
+}
+
+function saveArticleToDB(data) {
+  let imageUrl = 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=600&q=80';
+  if (data.imageBase64) {
+    try {
+      const file = uploadFileToDrive(data.imageBase64, data.mimeType, data.filename);
+      imageUrl = 'https://drive.google.com/thumbnail?id=' + file.getId() + '&sz=w800';
+    } catch (driveErr) { Logger.log('Drive error: ' + driveErr.message); }
+  }
+  try {
+    SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Articles')
+      .appendRow([data.id, data.title, imageUrl, data.excerpt, data.content, data.date, data.type]);
+    return { id: data.id, title: data.title, image: imageUrl, excerpt: data.excerpt, content: data.content, date: data.date, type: data.type };
+  } catch (sheetErr) { return { error: 'Gagal menyimpan: ' + sheetErr.message }; }
+}
+
+function updateArticleToDB(data) {
+  try {
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Articles');
+    const rows = sheet.getDataRange().getValues();
+    for (let i = 1; i < rows.length; i++) {
+      if (rows[i][0].toString() === data.id.toString()) {
+        let imageUrl = rows[i][2]; // Keep existing image by default
+        if (data.imageBase64) {
+          try {
+            const file = uploadFileToDrive(data.imageBase64, data.mimeType, data.filename);
+            imageUrl = 'https://drive.google.com/thumbnail?id=' + file.getId() + '&sz=w800';
+          } catch (driveErr) { Logger.log('Drive error: ' + driveErr.message); }
+        }
+        sheet.getRange(i + 1, 2).setValue(data.title);
+        sheet.getRange(i + 1, 3).setValue(imageUrl);
+        sheet.getRange(i + 1, 4).setValue(data.excerpt);
+        sheet.getRange(i + 1, 5).setValue(data.content);
+        sheet.getRange(i + 1, 7).setValue(data.type);
+        return { id: data.id, title: data.title, image: imageUrl, excerpt: data.excerpt, content: data.content, date: formatDate(rows[i][5]), type: data.type };
+      }
+    }
+    return { error: 'Artikel tidak ditemukan' };
+  } catch (err) { return { error: 'Gagal update: ' + err.message }; }
+}
+
+function deleteArticleDB(id) {
+  const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Articles');
+  if (!sheet) return false;
+  const data = sheet.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][0].toString() === id.toString()) { sheet.deleteRow(i + 1); break; }
+  }
+  return true;
+}
+
+function saveDocumentToDB(data) {
+  let fileUrl = '#';
+  if (data.fileBase64) {
+    try {
+      const file = uploadFileToDrive(data.fileBase64, data.mimeType, data.filename);
+      fileUrl = file.getUrl();
+    } catch (driveErr) { Logger.log('Drive error: ' + driveErr.message); }
+  }
+  try {
+    SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Documents')
+      .appendRow([data.id, data.title, data.desc, data.icon, data.color, fileUrl, data.date, data.category || 'Dokumen Penting Lainnya']);
+    return { id: data.id, title: data.title, desc: data.desc, icon: data.icon, color: data.color, fileUrl: fileUrl, date: data.date, category: data.category || 'Dokumen Penting Lainnya' };
+  } catch (sheetErr) { return { error: 'Gagal menyimpan: ' + sheetErr.message }; }
+}
+
+function deleteDocumentDB(id) {
+  const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Documents');
+  if (!sheet) return false;
+  const data = sheet.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][0].toString() === id.toString()) { sheet.deleteRow(i + 1); break; }
+  }
+  return true;
+}
+
+function saveUserToDB(data) {
+  try {
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Users');
+    if (!sheet) return { error: 'Sheet Users tidak ditemukan' };
+    const rows = sheet.getDataRange().getValues();
+
+    if (data.id) {
+      // Update existing user
+      for (let i = 1; i < rows.length; i++) {
+        if (rows[i][0].toString() === data.id.toString()) {
+          sheet.getRange(i + 1, 2).setValue(data.displayName);
+          sheet.getRange(i + 1, 3).setValue(data.username);
+          if (data.password) sheet.getRange(i + 1, 4).setValue(data.password);
+          sheet.getRange(i + 1, 5).setValue(data.role);
+          return { id: data.id, displayName: data.displayName, username: data.username, role: data.role };
+        }
+      }
+      return { error: 'User tidak ditemukan' };
+    } else {
+      // Create new user
+      const newId = Date.now();
+      sheet.appendRow([newId, data.displayName, data.username, data.password, data.role]);
+      return { id: newId, displayName: data.displayName, username: data.username, role: data.role };
+    }
+  } catch (err) { return { error: 'Gagal simpan user: ' + err.message }; }
+}
+
+function deleteUserDB(id) {
+  try {
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Users');
+    if (!sheet) return false;
+    const data = sheet.getDataRange().getValues();
+    for (let i = 1; i < data.length; i++) {
+      if (data[i][0].toString() === id.toString()) { sheet.deleteRow(i + 1); return true; }
+    }
+    return false;
+  } catch (err) { return false; }
+}
+
+function saveSettingToDB(key, value) {
+  const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Settings');
+  const data = sheet.getDataRange().getValues();
+  let found = false;
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][0] === key) { sheet.getRange(i + 1, 2).setValue(value); found = true; break; }
+  }
+  if (!found) sheet.appendRow([key, value]);
+  return true;
+}
+
+function saveMultipleSettingsToDB(settingsArray) {
+  const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Settings');
+  const data = sheet.getDataRange().getValues();
+  let keyRowMap = {};
+  for (let i = 1; i < data.length; i++) keyRowMap[data[i][0]] = i + 1;
+  settingsArray.forEach(item => {
+    if (keyRowMap[item.key]) {
+      sheet.getRange(keyRowMap[item.key], 2).setValue(item.value);
+    } else {
+      sheet.appendRow([item.key, item.value]);
+      keyRowMap[item.key] = sheet.getLastRow();
+    }
+  });
+  return true;
+}
