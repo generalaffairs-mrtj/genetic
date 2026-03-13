@@ -33,7 +33,7 @@
         @keyframes marquee { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
         .hide { display: none !important; }
         .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0,0,0,0.05); }
-        #editor-container { height: 300px; background: white; }
+        #editor-container, #info-editor-container { height: 300px; background: white; }
         .hide-scroll::-webkit-scrollbar { display: none; }
     </style>
 </head>
@@ -44,48 +44,29 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-20 items-center">
                 <div class="flex-shrink-0 flex items-center cursor-pointer" onclick="navigate('')">
-                    <i class="ph ph-intersect text-4xl text-secondary mr-2"></i>
+                    <!-- Ganti Icon dengan logo.png dari server -->
+                    <img src="logo.png" alt="Logo" class="h-8 w-auto mr-3 object-contain" onerror="this.src='https://via.placeholder.com/32?text=G'; this.classList.add('rounded-full');">
                     <span class="font-bold text-2xl tracking-tighter text-primary">GENETIC</span>
                 </div>
                 
-                <!-- Hamburger Menu (Mobile) -->
                 <div class="flex items-center md:hidden">
-                    <button onclick="toggleMobileMenu()" class="text-primary p-2 focus:outline-none">
-                        <i class="ph ph-list text-3xl" id="mobile-menu-icon"></i>
-                    </button>
+                    <button onclick="toggleMobileMenu()" class="text-primary p-2 focus:outline-none"><i class="ph ph-list text-3xl" id="mobile-menu-icon"></i></button>
                 </div>
 
-                <!-- Desktop Menu -->
                 <div class="hidden md:flex space-x-1 items-center">
                     <div id="desktop-menu-categories" class="flex items-center"></div>
-                    
-                    <!-- Dokumen Penting -->
-                    <button onclick="navigate('dokumen-penting')" class="flex items-center text-sm font-medium text-slate-600 hover:text-secondary transition-colors px-3 py-2">
-                        Dokumen Penting
-                    </button>
-
-                    <button onclick="navigate('login')" id="nav-login-btn" class="ml-4 bg-primary text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-secondary transition-colors shadow-lg shadow-primary/30">
-                        Login Portal
-                    </button>
-                    <button onclick="navigate('cpanel')" id="nav-cpanel-btn" class="hide ml-4 bg-accent text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-purple-600 transition-colors shadow-lg shadow-purple-500/30">
-                        CPanel
-                    </button>
-                    <button onclick="logout()" id="nav-logout-btn" class="hide ml-2 text-slate-500 hover:text-red-500 px-3 py-2 rounded-full text-xl">
-                        <i class="ph ph-sign-out"></i>
-                    </button>
+                    <button onclick="navigate('dokumen-penting')" class="flex items-center text-sm font-medium text-slate-600 hover:text-secondary transition-colors px-3 py-2">Dokumen Penting</button>
+                    <button onclick="navigate('login')" id="nav-login-btn" class="ml-4 bg-primary text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-secondary transition-colors shadow-lg shadow-primary/30">Login Portal</button>
+                    <button onclick="navigate('cpanel')" id="nav-cpanel-btn" class="hide ml-4 bg-accent text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-purple-600 transition-colors shadow-lg shadow-purple-500/30">CPanel</button>
+                    <button onclick="logout()" id="nav-logout-btn" class="hide ml-2 text-slate-500 hover:text-red-500 px-3 py-2 rounded-full text-xl"><i class="ph ph-sign-out"></i></button>
                 </div>
             </div>
         </div>
 
-        <!-- Mobile Menu Dropdown -->
         <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-slate-100 shadow-xl max-h-[80vh] overflow-y-auto">
             <div class="px-4 pt-2 pb-6 space-y-1">
                 <div id="mobile-menu-categories"></div>
-                
-                <button onclick="navigate('dokumen-penting'); toggleMobileMenu();" class="w-full text-left block py-4 font-semibold text-secondary border-b border-slate-50">
-                    <i class="ph ph-folder-open mr-2"></i> Dokumen Penting
-                </button>
-
+                <button onclick="navigate('dokumen-penting'); toggleMobileMenu();" class="w-full text-left block py-4 font-semibold text-secondary border-b border-slate-50"><i class="ph ph-folder-open mr-2"></i> Dokumen Penting</button>
                 <div class="pt-4 flex flex-col space-y-3">
                     <button onclick="navigate('login'); toggleMobileMenu();" id="mobile-login-btn" class="bg-primary text-white px-5 py-3 rounded-xl text-sm font-semibold text-center">Login Portal</button>
                     <button onclick="navigate('cpanel'); toggleMobileMenu();" id="mobile-cpanel-btn" class="hide bg-accent text-white px-5 py-3 rounded-xl text-sm font-semibold text-center">CPanel</button>
@@ -96,9 +77,7 @@
     </nav>
 
     <!-- Main Content Area -->
-    <main class="flex-grow pt-20" id="main-container">
-        <!-- Views will be injected here via JS -->
-    </main>
+    <main class="flex-grow pt-20" id="main-container"></main>
 
     <!-- Global Footer -->
     <footer class="bg-primary pt-16 pb-28 border-t border-slate-800 relative z-30 mt-auto">
@@ -108,46 +87,30 @@
                 <div class="grid grid-cols-1 md:grid-cols-5 gap-10 md:gap-8 border-b border-slate-200 pb-10 mb-8">
                     <div class="md:col-span-2">
                         <div class="flex items-center text-primary mb-6">
-                            <i class="ph ph-intersect text-3xl text-secondary mr-2"></i>
+                            <img src="logo.png" alt="Logo" class="h-8 w-auto mr-3 object-contain" onerror="this.src='https://via.placeholder.com/32?text=G'; this.classList.add('rounded-full');">
                             <span class="font-semibold text-xl tracking-tight">GENETIC</span>
                         </div>
                         <h3 class="text-3xl font-medium text-slate-900 mb-8 leading-tight pr-4">Sentralisasi Layanan<br>Fasilitas & Operasional.</h3>
-                        <button class="bg-primary text-white pl-6 pr-2 py-2 flex items-center text-sm font-medium hover:bg-slate-800 transition-colors w-fit">
-                            Hubungi Tim GA
-                            <span class="bg-white text-primary p-1.5 ml-4 flex items-center justify-center"><i class="ph ph-arrow-right font-bold"></i></span>
-                        </button>
+                        <button class="bg-primary text-white pl-6 pr-2 py-2 flex items-center text-sm font-medium hover:bg-slate-800 transition-colors w-fit">Hubungi Tim GA <span class="bg-white text-primary p-1.5 ml-4 flex items-center justify-center"><i class="ph ph-arrow-right font-bold"></i></span></button>
                     </div>
-                    <div>
-                        <h4 class="font-medium text-slate-900 mb-5 text-sm">Layanan GA</h4>
-                        <ul class="space-y-4 text-sm text-slate-500">
-                            <li><a href="#" class="hover:text-primary transition-colors">Peminjaman Kendaraan</a></li>
-                            <li><a href="#" class="hover:text-primary transition-colors">Ruang Rapat & Fasilitas</a></li>
-                            <li><a href="#" class="hover:text-primary transition-colors">Permintaan ATK</a></li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h4 class="font-medium text-slate-900 mb-5 text-sm">Informasi Terkini</h4>
-                        <ul class="space-y-4 text-sm text-slate-500">
-                            <li><a href="#" class="hover:text-primary transition-colors">Berita Utama</a></li>
-                            <li><a href="#" class="hover:text-primary transition-colors">Kebijakan Baru</a></li>
-                            <li><a href="#" class="hover:text-primary transition-colors">SOP & Panduan</a></li>
-                        </ul>
-                    </div>
+                    <div><h4 class="font-medium text-slate-900 mb-5 text-sm">Layanan GA</h4><ul class="space-y-4 text-sm text-slate-500"><li><a href="#" class="hover:text-primary transition-colors">Peminjaman Kendaraan</a></li><li><a href="#" class="hover:text-primary transition-colors">Ruang Rapat & Fasilitas</a></li><li><a href="#" class="hover:text-primary transition-colors">Permintaan ATK</a></li></ul></div>
+                    <div><h4 class="font-medium text-slate-900 mb-5 text-sm">Informasi Terkini</h4><ul class="space-y-4 text-sm text-slate-500"><li><a href="#semua-informasi" class="hover:text-primary transition-colors">Berita Utama</a></li><li><a href="#semua-informasi" class="hover:text-primary transition-colors">Pengumuman</a></li><li><a href="#dokumen-penting" class="hover:text-primary transition-colors">SOP & Panduan</a></li></ul></div>
                     <div>
                         <h4 class="font-medium text-slate-900 mb-5 text-sm">Connect</h4>
                         <ul class="space-y-4 text-sm text-slate-500">
-                            <li><a href="#" class="hover:text-primary transition-colors flex items-center"><i class="ph ph-whatsapp-logo mr-2 text-lg"></i> Helpdesk WA</a></li>
-                            <li><a href="#" class="hover:text-primary transition-colors flex items-center"><i class="ph ph-envelope-simple mr-2 text-lg"></i> Email Ticket</a></li>
+                            <li><a href="#" id="footer-wa" class="hover:text-primary transition-colors flex items-center"><i class="ph ph-whatsapp-logo mr-2 text-lg"></i> Loading...</a></li>
+                            <li><a href="#" id="footer-email" class="hover:text-primary transition-colors flex items-center"><i class="ph ph-envelope-simple mr-2 text-lg"></i> Loading...</a></li>
+                            <li><span id="footer-phone" class="flex items-center"><i class="ph ph-phone mr-2 text-lg"></i> Loading...</span></li>
                         </ul>
                     </div>
                 </div>
                 <div class="flex flex-col md:flex-row justify-between text-xs text-slate-500 font-medium space-y-4 md:space-y-0">
                     <div class="flex flex-wrap gap-4 md:gap-6">
-                        <a href="#" class="hover:text-primary">Privacy Policy</a>
-                        <a href="#" class="hover:text-primary">Terms of Use</a>
+                        <a href="#privacy-policy" class="hover:text-primary">Privacy Policy</a>
+                        <a href="#terms-of-use" class="hover:text-primary">Terms of Use</a>
                         <a href="#" class="hover:text-primary">Cookie Consent</a>
                     </div>
-                    <div>© 2026 GENETIC (General Affairs). All rights reserved.</div>
+                    <div id="footer-copyright">© 2026 GENETIC (General Affairs).</div>
                 </div>
             </div>
         </div>
@@ -164,26 +127,24 @@
     <script>
         // ==========================================
         // KONFIGURASI PENTING UNTUK GITHUB / VERCEL
-        // Masukkan URL Web App Google Apps Script di sini:
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxaclSUAEWCAi0VKh8860HNRPMk6lbvbMtBdf4JTnudOT7IuPNxT8LB9SRBKGADkv13/exec';
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx0CH6dx6aMIwNOtXUOzvFMppUmgOYIe9AzJfxxkghZZWDZXwS6JJIgVexbPeBVBA_A/exec';
         // ==========================================
 
         let appState = {
             user: null, 
-            articles: [],
-            categories: [],
+            articles: [], documents: [], categories: [], 
             runningText: "Menyambungkan ke database...",
+            footerWA: '', footerEmail: '', footerPhone: '', footerCopyright: '',
+            privacyPolicy: '', termsOfUse: ''
         };
 
         let quillEditor = null;
+        let quillInfoEditor = null;
 
-        // --- Fetch API Wrapper ---
         async function fetchAPI(action, payload = null) {
-            if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbxaclSUAEWCAi0VKh8860HNRPMk6lbvbMtBdf4JTnudOT7IuPNxT8LB9SRBKGADkv13/exec') {
-                console.warn("Apps Script URL belum diatur! Menggunakan mode offline/mock data.");
-                return null;
+            if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbx0CH6dx6aMIwNOtXUOzvFMppUmgOYIe9AzJfxxkghZZWDZXwS6JJIgVexbPeBVBA_A/exec') {
+                console.warn("Apps Script URL belum diatur!"); return null;
             }
-
             try {
                 if (action === 'getInitialData') {
                     const res = await fetch(`${APPS_SCRIPT_URL}?action=getInitialData`);
@@ -192,108 +153,97 @@
                     const res = await fetch(APPS_SCRIPT_URL, {
                         method: 'POST',
                         body: JSON.stringify({ action: action, ...payload }),
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' } // text/plain menghindari CORS preflight
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' }
                     });
                     return await res.json();
                 }
             } catch (error) {
-                console.error("Fetch Error:", error);
-                alert("Terjadi kesalahan saat menghubungi server Google.");
-                return null;
+                console.error("Fetch Error:", error); alert("Gagal menghubungi server Google."); return null;
             }
         }
 
-        // --- Core Functions ---
         async function initApp() {
             document.getElementById('footer-running-text').innerHTML = `<span><i class="ph-fill ph-spinner animate-spin text-secondary mr-2"></i> Memuat data...</span>`;
-            
             const data = await fetchAPI('getInitialData');
-            
             if (data) {
                 appState.articles = data.articles;
+                appState.documents = data.documents || [];
                 appState.runningText = data.runningText;
-                appState.categories = data.categories;
+                appState.categories = data.categories || [];
+                
+                // Footer & Info Pages
+                appState.footerWA = data.footerWA || '';
+                appState.footerEmail = data.footerEmail || '';
+                appState.footerPhone = data.footerPhone || '';
+                appState.footerCopyright = data.footerCopyright || '';
+                appState.privacyPolicy = data.privacyPolicy || '';
+                appState.termsOfUse = data.termsOfUse || '';
             } else {
-                // Fallback Mock Data jika URL belum di set
-                appState.runningText = "Selamat Datang di Portal GENETIC (Mode Offline)";
-                appState.categories = [{ id: 1, name: 'Kategori A', subs: ['Sub 1'] }];
+                appState.runningText = "Gagal memuat data dari server.";
             }
-
-            updateUI();
-            handleRouting();
+            updateUI(); handleRouting();
             window.addEventListener('hashchange', handleRouting);
         }
 
         function updateUI() {
             document.getElementById('footer-running-text').innerHTML = `<span><i class="ph-fill ph-info text-secondary mr-2"></i> ${appState.runningText}</span>`;
+            
+            // Update Dynamic Footer Elements
+            document.getElementById('footer-wa').innerHTML = `<i class="ph ph-whatsapp-logo mr-2 text-lg"></i> ${appState.footerWA || '0812xxxx'}`;
+            document.getElementById('footer-email').innerHTML = `<i class="ph ph-envelope-simple mr-2 text-lg"></i> ${appState.footerEmail || 'email@company.com'}`;
+            document.getElementById('footer-phone').innerHTML = `<i class="ph ph-phone mr-2 text-lg"></i> Ext: ${appState.footerPhone || '1234'}`;
+            document.getElementById('footer-copyright').innerText = appState.footerCopyright || '© 2026 GENETIC.';
+
             renderNavbarCategories();
             
-            if (appState.user) {
-                document.getElementById('nav-login-btn').classList.add('hide');
-                document.getElementById('nav-logout-btn').classList.remove('hide');
-                document.getElementById('nav-cpanel-btn').classList.remove('hide');
-                document.getElementById('mobile-login-btn').classList.add('hide');
-                document.getElementById('mobile-logout-btn').classList.remove('hide');
-                document.getElementById('mobile-cpanel-btn').classList.remove('hide');
-            } else {
-                document.getElementById('nav-login-btn').classList.remove('hide');
-                document.getElementById('nav-logout-btn').classList.add('hide');
-                document.getElementById('nav-cpanel-btn').classList.add('hide');
-                document.getElementById('mobile-login-btn').classList.remove('hide');
-                document.getElementById('mobile-logout-btn').classList.add('hide');
-                document.getElementById('mobile-cpanel-btn').classList.add('hide');
-            }
+            ['login-btn', 'logout-btn', 'cpanel-btn'].forEach(id => {
+                document.getElementById(`nav-${id}`).classList[appState.user && id !== 'login-btn' || !appState.user && id === 'login-btn' ? 'remove' : 'add']('hide');
+                document.getElementById(`mobile-${id}`).classList[appState.user && id !== 'login-btn' || !appState.user && id === 'login-btn' ? 'remove' : 'add']('hide');
+            });
         }
 
         function renderNavbarCategories() {
-            const deskContainer = document.getElementById('desktop-menu-categories');
-            deskContainer.innerHTML = appState.categories.map(cat => `
+            const htmlDesk = appState.categories.map(cat => `
                 <div class="relative group dropdown px-2 py-2">
-                    <button class="flex items-center text-sm font-medium text-slate-600 hover:text-secondary transition-colors">
-                        ${cat.name} <i class="ph ph-caret-down ml-1"></i>
-                    </button>
+                    <button class="flex items-center text-sm font-medium text-slate-600 hover:text-secondary transition-colors">${cat.name} <i class="ph ph-caret-down ml-1"></i></button>
                     <div class="dropdown-menu absolute hidden top-full left-0 w-48 bg-white shadow-xl rounded-xl overflow-hidden mt-1 border border-slate-100">
-                        ${cat.subs.map(sub => `<a href="#" class="block px-4 py-3 text-sm text-slate-600 hover:bg-slate-50 hover:text-secondary border-b border-slate-50 last:border-0">${sub}</a>`).join('')}
+                        ${cat.subs.map(sub => `<a href="${sub.url || '#'}" ${sub.url && sub.url.startsWith('http') ? 'target="_blank"' : ''} class="block px-4 py-3 text-sm text-slate-600 hover:bg-slate-50 hover:text-secondary border-b border-slate-50 last:border-0">${sub.name}</a>`).join('')}
                         ${cat.subs.length === 0 ? `<div class="px-4 py-3 text-sm text-slate-400 italic">Kosong</div>` : ''}
                     </div>
                 </div>
             `).join('');
+            document.getElementById('desktop-menu-categories').innerHTML = htmlDesk;
 
-            const mobContainer = document.getElementById('mobile-menu-categories');
-            mobContainer.innerHTML = appState.categories.map(cat => `
+            const htmlMob = appState.categories.map(cat => `
                 <div class="py-2 border-b border-slate-50">
                     <div class="font-semibold text-slate-800 py-2">${cat.name}</div>
                     <div class="pl-4 space-y-2">
-                        ${cat.subs.map(sub => `<a href="#" class="block text-sm text-slate-500 hover:text-secondary py-1">${sub}</a>`).join('')}
-                        ${cat.subs.length === 0 ? `<div class="text-sm text-slate-400 italic">Kosong</div>` : ''}
+                        ${cat.subs.map(sub => `<a href="${sub.url || '#'}" class="block text-sm text-slate-500 hover:text-secondary py-1">${sub.name}</a>`).join('')}
                     </div>
                 </div>
             `).join('');
+            document.getElementById('mobile-menu-categories').innerHTML = htmlMob;
         }
 
         function toggleMobileMenu() {
-            const menu = document.getElementById('mobile-menu');
-            const icon = document.getElementById('mobile-menu-icon');
+            const menu = document.getElementById('mobile-menu'), icon = document.getElementById('mobile-menu-icon');
             menu.classList.toggle('hidden');
-            if(menu.classList.contains('hidden')) icon.classList.replace('ph-x', 'ph-list');
-            else icon.classList.replace('ph-list', 'ph-x');
+            icon.className = menu.classList.contains('hidden') ? 'ph ph-list text-3xl' : 'ph ph-x text-3xl';
         }
 
         function navigate(route) { window.location.hash = route; }
 
         function handleRouting() {
-            const hash = window.location.hash.substring(1);
-            const container = document.getElementById('main-container');
+            const hash = window.location.hash.substring(1), container = document.getElementById('main-container');
             window.scrollTo(0, 0);
             
             if (hash === '' || hash === 'home') renderHome(container);
             else if (hash === 'login') renderLogin(container);
-            else if (hash === 'cpanel') {
-                if (!appState.user) { alert('Harap login terlebih dahulu.'); navigate('login'); return; }
-                renderCPanel(container);
-            } 
+            else if (hash === 'cpanel') { if (!appState.user) return navigate('login'); renderCPanel(container); }
             else if (hash === 'semua-informasi') renderSemuaInformasi(container);
             else if (hash === 'dokumen-penting') renderDokumenPenting(container);
+            else if (hash === 'privacy-policy') renderStaticPage(container, "Privacy Policy", appState.privacyPolicy);
+            else if (hash === 'terms-of-use') renderStaticPage(container, "Terms of Use", appState.termsOfUse);
             else if (hash.startsWith('artikel/')) renderArticleDetail(container, parseInt(hash.split('/')[1]));
             else renderHome(container);
         }
@@ -310,9 +260,7 @@
                     <div class="h-48 overflow-hidden relative flex-shrink-0">
                         <div class="absolute inset-0 bg-primary/20 group-hover:bg-transparent transition-all z-10"></div>
                         <img src="${art.image}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="${art.title}">
-                        <div class="absolute top-4 left-4 z-20">
-                            <span class="${getBadgeColor(art.type)} px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">${art.type || 'Informasi'}</span>
-                        </div>
+                        <div class="absolute top-4 left-4 z-20"><span class="${getBadgeColor(art.type)} px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">${art.type || 'Informasi'}</span></div>
                     </div>
                     <div class="p-6 flex-grow flex flex-col">
                         <div class="text-xs font-semibold text-slate-400 mb-2"><i class="ph ph-calendar-blank mr-1"></i> ${art.date}</div>
@@ -325,9 +273,7 @@
 
         function renderHome(container) {
             const topArticles = appState.articles.slice(0, 3);
-            let articlesHtml = topArticles.length === 0 
-                ? '<div class="w-full text-center text-slate-500 py-10 col-span-full">Belum ada artikel yang dipublikasikan.</div>' 
-                : topArticles.map(art => renderArticleCard(art)).join('');
+            let articlesHtml = topArticles.length === 0 ? '<div class="w-full text-center text-slate-500 py-10 col-span-full">Belum ada artikel yang dipublikasikan.</div>' : topArticles.map(art => renderArticleCard(art)).join('');
 
             container.innerHTML = `
                 <div class="relative bg-primary overflow-hidden">
@@ -335,34 +281,18 @@
                     <div class="absolute inset-0 bg-gradient-to-r from-primary via-primary/90 to-accent/40"></div>
                     <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-48 flex flex-col items-center text-center">
                         <div class="inline-flex items-center px-4 py-2 rounded-full bg-white/10 border border-white/20 text-white text-sm font-medium mb-6 md:mb-8 backdrop-blur-md">
-                            <span class="flex h-2 w-2 rounded-full bg-green-400 mr-2 animate-pulse"></span>
-                            Portal Resmi General Affairs
+                            <span class="flex h-2 w-2 rounded-full bg-green-400 mr-2 animate-pulse"></span> Portal Resmi General Affairs
                         </div>
-                        <h1 class="text-4xl md:text-7xl font-extrabold text-white tracking-tight mb-4 md:mb-6 leading-tight">
-                            Sentralisasi Layanan <br> <span class="text-transparent bg-clip-text bg-gradient-to-r from-secondary to-accent">Fasilitas & Operasional</span>
-                        </h1>
-                        <p class="mt-2 md:mt-4 text-lg md:text-xl text-slate-300 max-w-3xl mb-8 md:mb-10 font-light px-4">
-                            GENETIC memberikan akses cepat dan terpadu ke seluruh layanan, kebijakan, dan pembaruan dari divisi General Affairs untuk mendukung produktivitas Anda.
-                        </p>
+                        <h1 class="text-4xl md:text-7xl font-extrabold text-white tracking-tight mb-4 md:mb-6 leading-tight">Sentralisasi Layanan <br> <span class="text-transparent bg-clip-text bg-gradient-to-r from-secondary to-accent">Fasilitas & Operasional</span></h1>
+                        <p class="mt-2 md:mt-4 text-lg md:text-xl text-slate-300 max-w-3xl mb-8 md:mb-10 font-light px-4">GENETIC memberikan akses cepat dan terpadu ke seluruh layanan, kebijakan, dan pembaruan dari divisi General Affairs untuk mendukung produktivitas Anda.</p>
                     </div>
                 </div>
-
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 md:mb-10">
-                        <div>
-                            <h2 class="text-2xl md:text-3xl font-bold text-primary">Informasi Terbaru</h2>
-                            <p class="text-slate-500 mt-1 md:mt-2 text-sm md:text-base">Pembaruan, pengumuman, dan artikel terkait operasional.</p>
-                        </div>
-                        ${appState.articles.length > 3 ? `
-                            <button onclick="navigate('semua-informasi')" class="mt-4 md:mt-0 bg-secondary/10 text-secondary hover:bg-secondary hover:text-white px-5 py-2.5 rounded-full text-sm font-semibold transition-colors flex items-center">
-                                Informasi Lainnya <i class="ph ph-arrow-right ml-2"></i>
-                            </button>
-                        ` : ''}
+                        <div><h2 class="text-2xl md:text-3xl font-bold text-primary">Informasi Terbaru</h2><p class="text-slate-500 mt-1 md:mt-2 text-sm md:text-base">Pembaruan, pengumuman, dan artikel terkait operasional.</p></div>
+                        ${appState.articles.length > 3 ? `<button onclick="navigate('semua-informasi')" class="mt-4 md:mt-0 bg-secondary/10 text-secondary hover:bg-secondary hover:text-white px-5 py-2.5 rounded-full text-sm font-semibold transition-colors flex items-center">Informasi Lainnya <i class="ph ph-arrow-right ml-2"></i></button>` : ''}
                     </div>
-                    
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                        ${articlesHtml}
-                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">${articlesHtml}</div>
                 </div>
             `;
         }
@@ -370,31 +300,15 @@
         function renderSemuaInformasi(container) {
             let articlesHtml = appState.articles.map(art => renderArticleCard(art)).join('');
             container.innerHTML = `
-                <div class="bg-slate-50 py-12 md:py-20 border-b border-slate-200">
-                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <h1 class="text-3xl md:text-5xl font-bold text-primary mb-4">Semua Informasi</h1>
-                        <p class="text-slate-500 text-lg">Kumpulan seluruh berita, pengumuman penting, dan imbauan operasional.</p>
-                    </div>
-                </div>
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 mb-16">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                        ${articlesHtml || '<div class="col-span-full text-center text-slate-500 py-10">Belum ada artikel.</div>'}
-                    </div>
-                </div>
+                <div class="bg-slate-50 py-12 md:py-20 border-b border-slate-200"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"><h1 class="text-3xl md:text-5xl font-bold text-primary mb-4">Semua Informasi</h1><p class="text-slate-500 text-lg">Kumpulan seluruh berita, pengumuman penting, dan imbauan operasional.</p></div></div>
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 mb-16"><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">${articlesHtml || '<div class="col-span-full text-center text-slate-500 py-10">Belum ada artikel.</div>'}</div></div>
             `;
         }
 
         function renderDokumenPenting(container) {
-            const documents = [
-                { title: 'SOP Peminjaman Kendaraan', desc: 'Prosedur peminjaman mobil operasional', icon: 'ph-car-profile', color: 'text-blue-500', bg: 'bg-blue-50' },
-                { title: 'Formulir Permintaan ATK', desc: 'Unduh form excel untuk permintaan bulanan', icon: 'ph-pencil-ruler', color: 'text-purple-500', bg: 'bg-purple-50' },
-                { title: 'Kebijakan K3 & Evakuasi', desc: 'Panduan keselamatan dan denah evakuasi gedung', icon: 'ph-warning-circle', color: 'text-red-500', bg: 'bg-red-50' },
-                { title: 'Jadwal Pemeliharaan 2026', desc: 'Kalender maintenance AC dan fasilitas', icon: 'ph-calendar-check', color: 'text-green-500', bg: 'bg-green-50' }
-            ];
-
-            const docHtml = documents.map(doc => `
-                <a href="#" class="group flex items-center p-5 bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-secondary transition-all">
-                    <div class="w-14 h-14 rounded-xl ${doc.bg} ${doc.color} flex items-center justify-center mr-5 flex-shrink-0 group-hover:scale-110 transition-transform"><i class="ph ${doc.icon} text-3xl"></i></div>
+            const docHtml = appState.documents.length === 0 ? '<div class="col-span-full text-center text-slate-500 py-10">Belum ada dokumen yang diunggah.</div>' : appState.documents.map(doc => `
+                <a href="${doc.fileUrl}" target="_blank" class="group flex items-center p-5 bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-secondary transition-all">
+                    <div class="w-14 h-14 rounded-xl ${doc.color} bg-opacity-10 flex items-center justify-center mr-5 flex-shrink-0 group-hover:scale-110 transition-transform"><i class="ph ${doc.icon || 'ph-file-text'} text-3xl"></i></div>
                     <div class="flex-grow">
                         <h3 class="font-bold text-slate-800 text-lg group-hover:text-secondary transition-colors">${doc.title}</h3>
                         <p class="text-slate-500 text-sm mt-1">${doc.desc}</p>
@@ -419,24 +333,24 @@
 
         function renderArticleDetail(container, id) {
             const article = appState.articles.find(a => a.id === id);
-            if (!article) { container.innerHTML = `<div class="text-center py-32 text-2xl">Artikel tidak ditemukan.</div>`; return; }
+            if (!article) return container.innerHTML = `<div class="text-center py-32 text-2xl">Artikel tidak ditemukan.</div>`;
 
             container.innerHTML = `
                 <div class="max-w-4xl mx-auto px-4 py-8 md:py-12 mb-10">
-                    <button onclick="navigate('')" class="mb-6 flex items-center text-slate-500 hover:text-secondary transition-colors">
-                        <i class="ph ph-arrow-left mr-2"></i> Kembali
-                    </button>
-                    <div class="rounded-2xl overflow-hidden shadow-lg mb-6">
-                        <img src="${article.image}" class="w-full h-48 md:h-80 object-cover" alt="Hero">
-                    </div>
-                    <div class="flex items-center space-x-4 mb-4">
-                        <span class="${getBadgeColor(article.type)} px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">${article.type || 'Informasi'}</span>
-                        <span class="text-slate-500 text-sm"><i class="ph ph-calendar-blank mr-1"></i> ${article.date}</span>
-                    </div>
+                    <button onclick="navigate('')" class="mb-6 flex items-center text-slate-500 hover:text-secondary transition-colors"><i class="ph ph-arrow-left mr-2"></i> Kembali</button>
+                    <div class="rounded-2xl overflow-hidden shadow-lg mb-6"><img src="${article.image}" class="w-full h-48 md:h-80 object-cover" alt="Hero"></div>
+                    <div class="flex items-center space-x-4 mb-4"><span class="${getBadgeColor(article.type)} px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">${article.type || 'Informasi'}</span><span class="text-slate-500 text-sm"><i class="ph ph-calendar-blank mr-1"></i> ${article.date}</span></div>
                     <h1 class="text-3xl md:text-4xl font-extrabold text-primary mb-6 leading-tight">${article.title}</h1>
-                    <div class="prose prose-base md:prose-lg max-w-none text-slate-600 prose-headings:text-primary prose-a:text-secondary">
-                        ${article.content}
-                    </div>
+                    <div class="prose prose-base md:prose-lg max-w-none text-slate-600 prose-headings:text-primary prose-a:text-secondary">${article.content}</div>
+                </div>
+            `;
+        }
+
+        function renderStaticPage(container, title, htmlContent) {
+            container.innerHTML = `
+                <div class="max-w-4xl mx-auto px-4 py-12 md:py-20 mb-10 bg-white shadow-xl rounded-2xl border border-slate-100 mt-10">
+                    <h1 class="text-3xl md:text-5xl font-extrabold text-primary mb-10 pb-6 border-b border-slate-100 text-center">${title}</h1>
+                    <div class="prose prose-base md:prose-lg max-w-none text-slate-600">${htmlContent}</div>
                 </div>
             `;
         }
@@ -445,19 +359,10 @@
             container.innerHTML = `
                 <div class="min-h-[70vh] flex items-center justify-center px-4 py-12">
                     <div class="bg-white p-8 md:p-10 rounded-3xl shadow-2xl shadow-slate-200 max-w-md w-full border border-slate-100">
-                        <div class="text-center mb-8">
-                            <div class="inline-flex justify-center items-center w-16 h-16 rounded-full bg-blue-50 text-secondary mb-4"><i class="ph ph-lock-key text-3xl"></i></div>
-                            <h2 class="text-2xl font-bold text-primary">Login Portal</h2>
-                        </div>
+                        <div class="text-center mb-8"><div class="inline-flex justify-center items-center w-16 h-16 rounded-full bg-blue-50 text-secondary mb-4"><i class="ph ph-lock-key text-3xl"></i></div><h2 class="text-2xl font-bold text-primary">Login Portal</h2></div>
                         <form onsubmit="handleLogin(event)" class="space-y-6">
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Username</label>
-                                <input type="text" id="username" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-secondary outline-none" required placeholder="general00">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Password</label>
-                                <input type="password" id="password" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-secondary outline-none" required placeholder="••••••••">
-                            </div>
+                            <div><label class="block text-sm font-medium text-slate-700 mb-2">Username</label><input type="text" id="username" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-secondary outline-none" required placeholder="general00"></div>
+                            <div><label class="block text-sm font-medium text-slate-700 mb-2">Password</label><input type="password" id="password" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-secondary outline-none" required placeholder="••••••••"></div>
                             <button type="submit" class="w-full bg-primary hover:bg-slate-800 text-white font-bold py-3.5 rounded-xl transition-colors shadow-lg">Masuk ke Sistem</button>
                         </form>
                     </div>
@@ -471,16 +376,12 @@
                 <div class="max-w-7xl mx-auto px-4 py-6 md:py-10 mb-10 flex flex-col md:flex-row gap-6 md:gap-8">
                     <div class="w-full md:w-64 flex-shrink-0">
                         <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 sticky top-24 md:top-28">
-                            <div class="pb-4 mb-4 border-b border-slate-100 px-4 text-center">
-                                <p class="text-xs text-slate-400 uppercase tracking-wider font-bold mb-1">Logged in as</p>
-                                <p class="font-bold text-primary flex items-center justify-center">
-                                    <i class="ph-fill ph-user-circle text-2xl ${isMaster ? 'text-accent' : 'text-secondary'} mr-2"></i>
-                                    ${isMaster ? 'MASTER ADMIN' : 'ADMIN'}
-                                </p>
-                            </div>
+                            <div class="pb-4 mb-4 border-b border-slate-100 px-4 text-center"><p class="text-xs text-slate-400 uppercase tracking-wider font-bold mb-1">Logged in as</p><p class="font-bold text-primary flex items-center justify-center"><i class="ph-fill ph-user-circle text-2xl ${isMaster ? 'text-accent' : 'text-secondary'} mr-2"></i> ${isMaster ? 'MASTER ADMIN' : 'ADMIN'}</p></div>
                             <nav class="space-y-1">
                                 <button onclick="switchCpanelTab('artikel')" class="w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl text-secondary bg-blue-50 transition-colors" id="tab-btn-artikel"><i class="ph ph-article mr-3 text-lg"></i> Kelola Artikel</button>
-                                ${isMaster ? `<button onclick="switchCpanelTab('kategori')" class="w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-600 hover:bg-slate-50 transition-colors" id="tab-btn-kategori"><i class="ph ph-list-dashes mr-3 text-lg"></i> Kelola Kategori</button>
+                                ${isMaster ? `<button onclick="switchCpanelTab('dokumen')" class="w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-600 hover:bg-slate-50 transition-colors" id="tab-btn-dokumen"><i class="ph ph-folder-open mr-3 text-lg"></i> Dokumen Penting</button>
+                                <button onclick="switchCpanelTab('kategori')" class="w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-600 hover:bg-slate-50 transition-colors" id="tab-btn-kategori"><i class="ph ph-list-dashes mr-3 text-lg"></i> Kelola Kategori</button>
+                                <button onclick="switchCpanelTab('halaman-info')" class="w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-600 hover:bg-slate-50 transition-colors" id="tab-btn-halaman-info"><i class="ph ph-file-text mr-3 text-lg"></i> Halaman Info</button>
                                 <button onclick="switchCpanelTab('pengaturan')" class="w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-600 hover:bg-slate-50 transition-colors" id="tab-btn-pengaturan"><i class="ph ph-gear mr-3 text-lg"></i> Pengaturan Web</button>` : ''}
                             </nav>
                         </div>
@@ -492,7 +393,7 @@
         }
 
         function switchCpanelTab(tab) {
-            ['artikel', 'kategori', 'pengaturan'].forEach(t => {
+            ['artikel', 'dokumen', 'kategori', 'halaman-info', 'pengaturan'].forEach(t => {
                 const btn = document.getElementById(`tab-btn-${t}`);
                 if(btn) {
                     if(t === tab) { btn.classList.replace('text-slate-600', 'text-secondary'); btn.classList.replace('hover:bg-slate-50', 'bg-blue-50'); }
@@ -501,65 +402,72 @@
             });
 
             const content = document.getElementById('cpanel-content');
-            if (tab === 'artikel') {
-                let listHtml = appState.articles.map(art => `
-                    <div class="flex flex-col sm:flex-row justify-between sm:items-center p-4 border-b border-slate-100 hover:bg-slate-50 gap-4">
-                        <div class="flex items-center">
-                            <div class="w-12 h-12 rounded bg-slate-200 mr-4 overflow-hidden flex-shrink-0"><img src="${art.image}" class="w-full h-full object-cover"></div>
-                            <div>
-                                <p class="font-bold text-sm text-primary line-clamp-1">${art.title}</p>
-                                <div class="flex items-center space-x-2 mt-1">
-                                    <span class="text-xs text-slate-500">${art.date}</span>
-                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${getBadgeColor(art.type)} uppercase">${art.type || 'Informasi'}</span>
-                                </div>
-                            </div>
-                        </div>
-                        <button class="text-slate-400 hover:text-red-500 flex-shrink-0 self-end sm:self-auto" onclick="deleteArticle(${art.id}, this)"><i class="ph ph-trash text-lg"></i> Hapus</button>
-                    </div>
-                `).join('');
+            if (tab === 'artikel') renderCPanelArtikel(content);
+            else if (tab === 'dokumen') renderCPanelDokumen(content);
+            else if (tab === 'kategori') renderKategoriCRUD(content);
+            else if (tab === 'halaman-info') renderCPanelHalamanInfo(content);
+            else if (tab === 'pengaturan') renderCPanelPengaturan(content);
+        }
 
-                content.innerHTML = `
-                    <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
-                        <h2 class="text-xl md:text-2xl font-bold text-primary">Kelola Artikel</h2>
-                        <button onclick="showEditor()" class="bg-secondary text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center justify-center hover:bg-blue-600 w-full sm:w-auto"><i class="ph ph-plus mr-2"></i> Tulis Artikel</button>
+        // --- CPanel Sections ---
+
+        function renderCPanelArtikel(content) {
+            let listHtml = appState.articles.map(art => `
+                <div class="flex flex-col sm:flex-row justify-between sm:items-center p-4 border-b border-slate-100 hover:bg-slate-50 gap-4">
+                    <div class="flex items-center"><div class="w-12 h-12 rounded bg-slate-200 mr-4 overflow-hidden flex-shrink-0"><img src="${art.image}" class="w-full h-full object-cover"></div><div><p class="font-bold text-sm text-primary line-clamp-1">${art.title}</p><div class="flex items-center space-x-2 mt-1"><span class="text-xs text-slate-500">${art.date}</span><span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${getBadgeColor(art.type)} uppercase">${art.type || 'Informasi'}</span></div></div></div>
+                    <button class="text-slate-400 hover:text-red-500 flex-shrink-0 self-end sm:self-auto" onclick="deleteArticle(${art.id}, this)"><i class="ph ph-trash text-lg"></i> Hapus</button>
+                </div>
+            `).join('');
+
+            content.innerHTML = `
+                <div class="flex justify-between items-center mb-6"><h2 class="text-xl md:text-2xl font-bold text-primary">Kelola Artikel</h2><button onclick="document.getElementById('article-list-container').classList.add('hide'); document.getElementById('article-editor-container').classList.remove('hide'); if(!quillEditor) quillEditor = new Quill('#editor-container', { theme: 'snow', modules: { toolbar: [ [{ 'header': [1, 2, 3, false] }], ['bold', 'italic', 'underline'], [{ 'list': 'ordered'}, { 'list': 'bullet' }], ['link'], ['clean'] ] } });" class="bg-secondary text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center justify-center hover:bg-blue-600"><i class="ph ph-plus mr-2"></i> Tulis Artikel</button></div>
+                <div id="article-list-container" class="border border-slate-100 rounded-xl overflow-hidden">${listHtml || '<div class="p-4 text-center text-slate-500 text-sm">Belum ada artikel.</div>'}</div>
+                <div id="article-editor-container" class="hide mt-6 border-t border-slate-100 pt-6">
+                    <h3 class="text-lg font-bold mb-4">Buat Artikel Baru</h3>
+                    <input type="text" id="post-title" placeholder="Judul Artikel" class="w-full px-4 py-3 rounded-xl border border-slate-200 mb-4 font-bold text-lg outline-none focus:border-secondary">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div><label class="block text-sm font-medium text-slate-700 mb-2">Tipe Artikel</label><select id="post-type" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm outline-none focus:border-secondary bg-white"><option value="Informasi">Informasi</option><option value="Pengumuman Penting">Pengumuman Penting</option><option value="Imbauan">Imbauan</option></select></div>
+                        <div><label class="block text-sm font-medium text-slate-700 mb-2">Upload Gambar Utama</label><input type="file" id="post-image-file" accept="image/*" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-secondary hover:file:bg-blue-100"></div>
                     </div>
-                    <div id="article-list-container" class="border border-slate-100 rounded-xl overflow-hidden">${listHtml || '<div class="p-4 text-center text-slate-500 text-sm">Belum ada artikel.</div>'}</div>
-                    <div id="article-editor-container" class="hide mt-6 border-t border-slate-100 pt-6">
-                        <h3 class="text-lg font-bold mb-4">Buat Artikel Baru</h3>
-                        <input type="text" id="post-title" placeholder="Judul Artikel" class="w-full px-4 py-3 rounded-xl border border-slate-200 mb-4 font-bold text-lg outline-none focus:border-secondary">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Tipe Artikel</label>
-                                <select id="post-type" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm outline-none focus:border-secondary bg-white">
-                                    <option value="Informasi">Informasi</option><option value="Pengumuman Penting">Pengumuman Penting</option><option value="Imbauan">Imbauan</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Upload Gambar Utama</label>
-                                <input type="file" id="post-image-file" accept="image/*" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-secondary hover:file:bg-blue-100">
-                            </div>
-                        </div>
-                        <div id="editor-container" class="rounded-xl overflow-hidden mb-4 border border-slate-200"></div>
-                        <div class="flex flex-col sm:flex-row justify-end gap-3 mt-4">
-                            <button onclick="hideEditor()" class="px-5 py-2.5 rounded-lg border border-slate-200 text-slate-600 font-medium hover:bg-slate-50 w-full sm:w-auto text-center">Batal</button>
-                            <button id="btn-publish" onclick="saveArticle()" class="px-5 py-2.5 rounded-lg bg-primary text-white font-bold hover:bg-slate-800 shadow-lg w-full sm:w-auto text-center">Publikasikan</button>
-                        </div>
+                    <div id="editor-container" class="rounded-xl overflow-hidden mb-4 border border-slate-200" style="height:300px;background:white;"></div>
+                    <div class="flex flex-col sm:flex-row justify-end gap-3 mt-4"><button onclick="document.getElementById('article-list-container').classList.remove('hide'); document.getElementById('article-editor-container').classList.add('hide');" class="px-5 py-2.5 rounded-lg border border-slate-200 text-slate-600 font-medium hover:bg-slate-50">Batal</button><button id="btn-publish" onclick="saveArticle()" class="px-5 py-2.5 rounded-lg bg-primary text-white font-bold hover:bg-slate-800 shadow-lg">Publikasikan</button></div>
+                </div>
+            `;
+        }
+
+        function renderCPanelDokumen(content) {
+            let listHtml = appState.documents.map(doc => `
+                <div class="flex justify-between items-center p-4 border-b border-slate-100 hover:bg-slate-50">
+                    <div class="flex items-center"><div class="w-10 h-10 rounded ${doc.color} bg-opacity-10 text-xl flex items-center justify-center mr-4"><i class="ph ${doc.icon || 'ph-file-text'}"></i></div><div><p class="font-bold text-sm text-primary line-clamp-1"><a href="${doc.fileUrl}" target="_blank" class="hover:underline">${doc.title}</a></p><p class="text-xs text-slate-500">${doc.desc}</p></div></div>
+                    <button class="text-slate-400 hover:text-red-500" onclick="deleteDocument(${doc.id}, this)"><i class="ph ph-trash text-lg"></i> Hapus</button>
+                </div>
+            `).join('');
+
+            content.innerHTML = `
+                <div class="flex justify-between items-center mb-6"><h2 class="text-xl md:text-2xl font-bold text-primary">Kelola Dokumen Penting</h2><button onclick="document.getElementById('doc-list').classList.add('hide'); document.getElementById('doc-form').classList.remove('hide');" class="bg-secondary text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center justify-center hover:bg-blue-600"><i class="ph ph-plus mr-2"></i> Upload Dokumen</button></div>
+                <div id="doc-list" class="border border-slate-100 rounded-xl overflow-hidden">${listHtml || '<div class="p-4 text-center text-slate-500 text-sm">Belum ada dokumen.</div>'}</div>
+                
+                <div id="doc-form" class="hide bg-slate-50 p-6 rounded-xl border border-slate-100">
+                    <h3 class="text-lg font-bold mb-4">Upload Dokumen Baru</h3>
+                    <input type="text" id="doc-title" placeholder="Judul Dokumen (cth: SOP Kendaraan)" class="w-full px-4 py-3 rounded-xl border border-slate-200 mb-3 text-sm outline-none focus:border-secondary">
+                    <input type="text" id="doc-desc" placeholder="Deskripsi Singkat" class="w-full px-4 py-3 rounded-xl border border-slate-200 mb-3 text-sm outline-none focus:border-secondary">
+                    <div class="grid grid-cols-2 gap-4 mb-3">
+                        <select id="doc-icon" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm outline-none focus:border-secondary bg-white">
+                            <option value="ph-file-text">Icon File Text</option><option value="ph-car-profile">Icon Kendaraan</option>
+                            <option value="ph-pencil-ruler">Icon ATK</option><option value="ph-warning-circle">Icon Peringatan</option>
+                        </select>
+                        <select id="doc-color" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm outline-none focus:border-secondary bg-white">
+                            <option value="text-blue-500">Warna Biru</option><option value="text-red-500">Warna Merah</option>
+                            <option value="text-green-500">Warna Hijau</option><option value="text-purple-500">Warna Ungu</option>
+                        </select>
                     </div>
-                `;
-            } else if (tab === 'kategori') {
-                renderKategoriCRUD(content);
-            } else if (tab === 'pengaturan') {
-                content.innerHTML = `
-                    <h2 class="text-xl md:text-2xl font-bold text-primary mb-6">Pengaturan Web</h2>
-                    <div class="space-y-6 max-w-2xl">
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-2">Footer Running Text</label>
-                            <textarea id="setting-running-text" rows="3" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-secondary outline-none">${appState.runningText}</textarea>
-                        </div>
-                        <button id="btn-savesetting" onclick="saveSettings()" class="bg-primary text-white px-6 py-2.5 rounded-lg font-bold hover:bg-slate-800 w-full md:w-auto text-center">Simpan Pengaturan</button>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-slate-700 mb-2">Pilih File (PDF/Word/Excel)</label>
+                        <input type="file" id="doc-file" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-secondary hover:file:bg-blue-100">
                     </div>
-                `;
-            }
+                    <div class="flex justify-end gap-3 mt-4"><button onclick="document.getElementById('doc-list').classList.remove('hide'); document.getElementById('doc-form').classList.add('hide');" class="px-5 py-2.5 rounded-lg border border-slate-200 text-slate-600 font-medium hover:bg-white">Batal</button><button id="btn-savedoc" onclick="saveDocument()" class="px-5 py-2.5 rounded-lg bg-primary text-white font-bold hover:bg-slate-800 shadow-lg">Upload Dokumen</button></div>
+                </div>
+            `;
         }
 
         function renderKategoriCRUD(container) {
@@ -573,14 +481,18 @@
                         <p class="text-xs font-semibold text-slate-400 mb-3 uppercase tracking-wider">Sub Kategori</p>
                         <div class="space-y-2 mb-3">
                             ${cat.subs.map((sub, sIdx) => `
-                                <div class="flex justify-between items-center bg-white border border-slate-200 rounded-lg px-3 py-2">
-                                    <input type="text" value="${sub}" onchange="updateSubCatName(${idx}, ${sIdx}, this.value)" class="text-sm text-slate-600 bg-transparent outline-none w-full">
-                                    <button onclick="deleteSubCat(${idx}, ${sIdx})" class="text-slate-400 hover:text-red-500 ml-2"><i class="ph ph-x"></i></button>
+                                <div class="flex flex-col sm:flex-row justify-between sm:items-center bg-white border border-slate-200 rounded-lg px-3 py-2 gap-2">
+                                    <div class="flex flex-col sm:flex-row w-full gap-2">
+                                        <input type="text" value="${sub.name}" placeholder="Nama Menu" onchange="updateSubCat(${idx}, ${sIdx}, 'name', this.value)" class="text-sm text-slate-800 font-medium bg-transparent outline-none border-b border-slate-200 focus:border-secondary w-full sm:w-1/3">
+                                        <input type="text" value="${sub.url || ''}" placeholder="URL (Contoh: https://google.com)" onchange="updateSubCat(${idx}, ${sIdx}, 'url', this.value)" class="text-sm text-slate-500 bg-transparent outline-none border-b border-slate-200 focus:border-secondary w-full sm:w-2/3">
+                                    </div>
+                                    <button onclick="deleteSubCat(${idx}, ${sIdx})" class="text-slate-400 hover:text-red-500 ml-2 self-end sm:self-auto"><i class="ph ph-x"></i></button>
                                 </div>
                             `).join('')}
                         </div>
                         <div class="flex items-center space-x-2">
-                            <input type="text" id="new-sub-${idx}" placeholder="Nama sub kategori baru..." class="text-sm px-3 py-2 rounded-lg border border-slate-200 outline-none w-full max-w-xs focus:border-secondary">
+                            <input type="text" id="new-sub-name-${idx}" placeholder="Nama Menu..." class="text-sm px-3 py-2 rounded-lg border border-slate-200 outline-none w-1/3 focus:border-secondary">
+                            <input type="text" id="new-sub-url-${idx}" placeholder="URL Link..." class="text-sm px-3 py-2 rounded-lg border border-slate-200 outline-none w-2/3 focus:border-secondary">
                             <button onclick="addSubCat(${idx})" class="bg-secondary text-white px-3 py-2 rounded-lg text-sm font-bold hover:bg-blue-600">Tambah</button>
                         </div>
                     </div>
@@ -596,49 +508,120 @@
             `;
         }
 
+        function renderCPanelHalamanInfo(content) {
+            content.innerHTML = `
+                <h2 class="text-xl md:text-2xl font-bold text-primary mb-6">Edit Halaman Statis</h2>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Pilih Halaman untuk Diedit</label>
+                    <select id="select-info-page" onchange="loadInfoPageEditor(this.value)" class="w-full md:w-1/2 px-4 py-3 rounded-xl border border-slate-200 text-sm outline-none focus:border-secondary bg-white">
+                        <option value="privacyPolicy">Privacy Policy</option>
+                        <option value="termsOfUse">Terms of Use</option>
+                    </select>
+                </div>
+                <div id="info-editor-container" class="rounded-xl overflow-hidden mb-4 border border-slate-200" style="height:350px;background:white;"></div>
+                <div class="flex justify-end mt-4">
+                    <button id="btn-saveinfo" onclick="saveInfoPage()" class="px-6 py-2.5 rounded-lg bg-primary text-white font-bold hover:bg-slate-800 shadow-lg">Simpan Halaman</button>
+                </div>
+            `;
+            // Init quill for info
+            if (!quillInfoEditor) {
+                quillInfoEditor = new Quill('#info-editor-container', { 
+                    theme: 'snow', 
+                    modules: { toolbar: [ [{ 'header': [1, 2, 3, false] }], ['bold', 'italic', 'underline'], [{ 'list': 'ordered'}, { 'list': 'bullet' }], ['link'], ['clean'] ] } 
+                });
+            }
+            loadInfoPageEditor('privacyPolicy'); // load default
+        }
+
+        function loadInfoPageEditor(pageKey) {
+            if(quillInfoEditor) {
+                quillInfoEditor.root.innerHTML = appState[pageKey] || '';
+            }
+        }
+
+        async function saveInfoPage() {
+            const pageKey = document.getElementById('select-info-page').value;
+            const htmlContent = quillInfoEditor.root.innerHTML;
+            const btn = document.getElementById('btn-saveinfo');
+            
+            btn.innerText = 'Menyimpan...'; btn.disabled = true;
+            
+            await fetchAPI('saveSetting', { key: pageKey, value: htmlContent });
+            
+            appState[pageKey] = htmlContent; // update state memory
+            btn.innerText = 'Simpan Halaman'; btn.disabled = false;
+            alert('Halaman berhasil diperbarui!');
+        }
+
+        function renderCPanelPengaturan(content) {
+            content.innerHTML = `
+                <h2 class="text-xl md:text-2xl font-bold text-primary mb-6">Pengaturan Web & Footer</h2>
+                <div class="space-y-6 max-w-2xl bg-slate-50 p-6 rounded-xl border border-slate-100">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">Running Text (Bawah Web)</label>
+                        <textarea id="set-running-text" rows="2" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-secondary outline-none">${appState.runningText}</textarea>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">No. WhatsApp Footer</label>
+                            <input type="text" id="set-footer-wa" value="${appState.footerWA}" placeholder="0812..." class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-secondary outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">Email Footer</label>
+                            <input type="text" id="set-footer-email" value="${appState.footerEmail}" placeholder="email@company.com" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-secondary outline-none">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">Telepon / Ext Footer</label>
+                            <input type="text" id="set-footer-phone" value="${appState.footerPhone}" placeholder="1234" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-secondary outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">Copyright Footer</label>
+                            <input type="text" id="set-footer-copyright" value="${appState.footerCopyright}" placeholder="© 2026..." class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-secondary outline-none">
+                        </div>
+                    </div>
+                    <button id="btn-savesetting" onclick="saveAllSettings()" class="bg-primary text-white px-6 py-3 rounded-lg font-bold hover:bg-slate-800 w-full mt-4">Simpan Seluruh Pengaturan</button>
+                </div>
+            `;
+        }
+
+        // --- Core Interactions Logic ---
+
         function updateCatName(idx, val) { if(val) appState.categories[idx].name = val; }
-        function updateSubCatName(idx, sIdx, val) { if(val) appState.categories[idx].subs[sIdx] = val; }
+        function updateSubCat(idx, sIdx, key, val) { appState.categories[idx].subs[sIdx][key] = val; }
         function addCat() { const input = document.getElementById('new-cat-name'); if(input.value.trim() !== '') { appState.categories.push({ id: Date.now(), name: input.value, subs: [] }); switchCpanelTab('kategori'); } }
         function deleteCat(idx) { if(confirm('Hapus kategori ini?')) { appState.categories.splice(idx, 1); switchCpanelTab('kategori'); } }
-        function addSubCat(idx) { const input = document.getElementById(`new-sub-${idx}`); if(input.value.trim() !== '') { appState.categories[idx].subs.push(input.value); switchCpanelTab('kategori'); } }
+        function addSubCat(idx) { 
+            const n = document.getElementById(`new-sub-name-${idx}`).value, u = document.getElementById(`new-sub-url-${idx}`).value; 
+            if(n.trim() !== '') { appState.categories[idx].subs.push({ name: n, url: u || '#' }); switchCpanelTab('kategori'); } 
+        }
         function deleteSubCat(idx, sIdx) { appState.categories[idx].subs.splice(sIdx, 1); switchCpanelTab('kategori'); }
         
         async function saveCategoriesToDB() {
-            const btn = document.getElementById('btn-savecat'); btn.innerText = 'Menyimpan...'; updateUI();
+            const btn = document.getElementById('btn-savecat'); btn.innerText = 'Menyimpan...'; 
             await fetchAPI('saveSetting', { key: 'categories_data', value: JSON.stringify(appState.categories) });
-            btn.innerText = 'Simpan Perubahan'; alert('Kategori berhasil disimpan!');
+            updateUI(); btn.innerText = 'Simpan Perubahan'; alert('Kategori berhasil disimpan!');
         }
 
         function handleLogin(e) {
-            e.preventDefault();
-            const u = document.getElementById('username').value, p = document.getElementById('password').value;
+            e.preventDefault(); const u = document.getElementById('username').value, p = document.getElementById('password').value;
             if (u === 'general00' && p === '00general') { appState.user = 'master'; updateUI(); navigate('cpanel'); }
             else if ((u === 'general01' && p === '01general') || (u === 'general02' && p === '02general')) { appState.user = 'admin'; updateUI(); navigate('cpanel'); }
             else alert('Username/Password salah!');
         }
-
         function logout() { appState.user = null; updateUI(); navigate('home'); }
-
-        function showEditor() {
-            document.getElementById('article-list-container').classList.add('hide'); document.getElementById('article-editor-container').classList.remove('hide');
-            if (!quillEditor) quillEditor = new Quill('#editor-container', { theme: 'snow', placeholder: 'Tulis isi artikel di sini...', modules: { toolbar: [ [{ 'header': [1, 2, 3, false] }], ['bold', 'italic', 'underline'], [{ 'list': 'ordered'}, { 'list': 'bullet' }], ['link'], ['clean'] ] } });
-            else { quillEditor.setText(''); document.getElementById('post-title').value = ''; document.getElementById('post-image-file').value = ''; }
-        }
-
-        function hideEditor() { document.getElementById('article-list-container').classList.remove('hide'); document.getElementById('article-editor-container').classList.add('hide'); }
 
         async function saveArticle() {
             const title = document.getElementById('post-title').value, type = document.getElementById('post-type').value, fileInput = document.getElementById('post-image-file'), content = quillEditor.root.innerHTML, excerpt = quillEditor.getText().substring(0, 100) + '...';
             if(!title || quillEditor.getText().trim() === '') return alert('Judul dan konten wajib diisi!');
-            
             const btn = document.getElementById('btn-publish'); btn.innerText = 'Menyimpan...'; btn.disabled = true;
-            const newId = Date.now(), dateStr = new Date().toLocaleDateString('id-ID', {day: '2-digit', month: 'short', year: 'numeric'});
-
+            
             const processSave = async (base64, fileType, fileName) => {
-                const articleData = { id: newId, title: title, imageBase64: base64, filename: fileName, mimeType: fileType, excerpt: excerpt, content: content, date: dateStr, type: type };
+                const articleData = { id: Date.now(), title: title, imageBase64: base64, filename: fileName, mimeType: fileType, excerpt: excerpt, content: content, date: new Date().toLocaleDateString('id-ID'), type: type };
                 const res = await fetchAPI('saveArticle', { data: articleData });
                 if (res) appState.articles.unshift(res);
-                hideEditor(); switchCpanelTab('artikel');
+                switchCpanelTab('artikel');
             };
 
             if (fileInput.files.length > 0) {
@@ -649,18 +632,60 @@
         }
 
         async function deleteArticle(id, btn) {
-            if(confirm('Yakin ingin menghapus artikel ini?')) {
-                btn.innerHTML = '...';
-                await fetchAPI('deleteArticle', { id: id });
-                appState.articles = appState.articles.filter(a => a.id !== id); switchCpanelTab('artikel');
-            }
+            if(confirm('Yakin ingin menghapus artikel ini?')) { btn.innerHTML = '...'; await fetchAPI('deleteArticle', { id: id }); appState.articles = appState.articles.filter(a => a.id !== id); switchCpanelTab('artikel'); }
         }
 
-        async function saveSettings() {
-            const val = document.getElementById('setting-running-text').value, btn = document.getElementById('btn-savesetting');
-            btn.innerText = 'Menyimpan...';
-            await fetchAPI('saveSetting', { key: 'runningText', value: val });
-            appState.runningText = val; updateUI(); btn.innerText = 'Simpan Pengaturan'; alert('Pengaturan berhasil disimpan!');
+        async function saveDocument() {
+            const title = document.getElementById('doc-title').value, desc = document.getElementById('doc-desc').value, icon = document.getElementById('doc-icon').value, color = document.getElementById('doc-color').value, fileInput = document.getElementById('doc-file');
+            if(!title || fileInput.files.length === 0) return alert('Judul dan File wajib diisi!');
+            const btn = document.getElementById('btn-savedoc'); btn.innerText = 'Mengupload...'; btn.disabled = true;
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const docData = { id: Date.now(), title: title, desc: desc, icon: icon, color: color, date: new Date().toLocaleDateString('id-ID'), fileBase64: e.target.result.split(',')[1], filename: fileInput.files[0].name, mimeType: fileInput.files[0].type };
+                const res = await fetchAPI('saveDocument', { data: docData });
+                if(res) appState.documents.unshift(res);
+                switchCpanelTab('dokumen');
+            };
+            reader.readAsDataURL(fileInput.files[0]);
+        }
+
+        async function deleteDocument(id, btn) {
+            if(confirm('Yakin ingin menghapus dokumen ini?')) { btn.innerHTML = '...'; await fetchAPI('deleteDocument', { id: id }); appState.documents = appState.documents.filter(d => d.id !== id); switchCpanelTab('dokumen'); }
+        }
+
+        async function saveAllSettings() {
+            const btn = document.getElementById('btn-savesetting'); 
+            btn.innerText = 'Menyimpan...'; btn.disabled = true;
+            
+            const vals = {
+                runningText: document.getElementById('set-running-text').value,
+                footerWA: document.getElementById('set-footer-wa').value,
+                footerEmail: document.getElementById('set-footer-email').value,
+                footerPhone: document.getElementById('set-footer-phone').value,
+                footerCopyright: document.getElementById('set-footer-copyright').value
+            };
+
+            const payload = [
+                {key: 'runningText', value: vals.runningText},
+                {key: 'footerWA', value: vals.footerWA},
+                {key: 'footerEmail', value: vals.footerEmail},
+                {key: 'footerPhone', value: vals.footerPhone},
+                {key: 'footerCopyright', value: vals.footerCopyright}
+            ];
+
+            await fetchAPI('saveMultipleSettings', { settings: payload });
+            
+            // Update UI State
+            appState.runningText = vals.runningText;
+            appState.footerWA = vals.footerWA;
+            appState.footerEmail = vals.footerEmail;
+            appState.footerPhone = vals.footerPhone;
+            appState.footerCopyright = vals.footerCopyright;
+
+            updateUI(); 
+            btn.innerText = 'Simpan Seluruh Pengaturan'; btn.disabled = false;
+            alert('Pengaturan web & footer berhasil disimpan!');
         }
 
         document.addEventListener('DOMContentLoaded', initApp);
