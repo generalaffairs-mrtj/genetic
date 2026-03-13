@@ -127,7 +127,7 @@
     <script>
         // ==========================================
         // KONFIGURASI PENTING UNTUK GITHUB / VERCEL
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx0CH6dx6aMIwNOtXUOzvFMppUmgOYIe9AzJfxxkghZZWDZXwS6JJIgVexbPeBVBA_A/exec';
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby7jgmLw2kNamtTI4kJCbDt8jUFkSKUJpfJQHcoILLsCj9HKjJNaRQeeii1oGSDz1er/exec';
         // ==========================================
 
         let appState = {
@@ -141,29 +141,35 @@
         let quillEditor = null;
         let quillInfoEditor = null;
 
+        // --- Fetch API Wrapper ---
         async function fetchAPI(action, payload = null) {
-            if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbx0CH6dx6aMIwNOtXUOzvFMppUmgOYIe9AzJfxxkghZZWDZXwS6JJIgVexbPeBVBA_A/exec') {
+            if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'https://script.google.com/macros/s/AKfycby7jgmLw2kNamtTI4kJCbDt8jUFkSKUJpfJQHcoILLsCj9HKjJNaRQeeii1oGSDz1er/exec') {
                 console.warn("Apps Script URL belum diatur!"); return null;
             }
             try {
                 if (action === 'getInitialData') {
-                    const res = await fetch(`${APPS_SCRIPT_URL}?action=getInitialData`);
+                    // CACHE BUSTER: Tambahkan timestamp &t=... agar browser selalu mengambil versi Sheet terbaru
+                    const cacheBuster = new Date().getTime();
+                    const res = await fetch(`${APPS_SCRIPT_URL}?action=getInitialData&t=${cacheBuster}`);
                     return await res.json();
                 } else {
                     const res = await fetch(APPS_SCRIPT_URL, {
                         method: 'POST',
+                        redirect: "follow", // Wajib follow redirect 302 dari Google
                         body: JSON.stringify({ action: action, ...payload }),
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' } // Hindari CORS Preflight
                     });
                     return await res.json();
                 }
             } catch (error) {
-                console.error("Fetch Error:", error); alert("Gagal menghubungi server Google."); return null;
+                console.error("Fetch Error:", error); 
+                alert("Gagal menghubungi server. Pastikan URL Apps Script benar dan telah di Deploy sebagai 'Anyone'."); 
+                return null;
             }
         }
 
         async function initApp() {
-            document.getElementById('footer-running-text').innerHTML = `<span><i class="ph-fill ph-spinner animate-spin text-secondary mr-2"></i> Memuat data...</span>`;
+            document.getElementById('footer-running-text').innerHTML = `<span><i class="ph-fill ph-spinner animate-spin text-secondary mr-2"></i> Memuat data dari server...</span>`;
             const data = await fetchAPI('getInitialData');
             if (data) {
                 appState.articles = data.articles;
@@ -523,20 +529,17 @@
                     <button id="btn-saveinfo" onclick="saveInfoPage()" class="px-6 py-2.5 rounded-lg bg-primary text-white font-bold hover:bg-slate-800 shadow-lg">Simpan Halaman</button>
                 </div>
             `;
-            // Init quill for info
             if (!quillInfoEditor) {
                 quillInfoEditor = new Quill('#info-editor-container', { 
                     theme: 'snow', 
                     modules: { toolbar: [ [{ 'header': [1, 2, 3, false] }], ['bold', 'italic', 'underline'], [{ 'list': 'ordered'}, { 'list': 'bullet' }], ['link'], ['clean'] ] } 
                 });
             }
-            loadInfoPageEditor('privacyPolicy'); // load default
+            loadInfoPageEditor('privacyPolicy');
         }
 
         function loadInfoPageEditor(pageKey) {
-            if(quillInfoEditor) {
-                quillInfoEditor.root.innerHTML = appState[pageKey] || '';
-            }
+            if(quillInfoEditor) { quillInfoEditor.root.innerHTML = appState[pageKey] || ''; }
         }
 
         async function saveInfoPage() {
@@ -545,12 +548,13 @@
             const btn = document.getElementById('btn-saveinfo');
             
             btn.innerText = 'Menyimpan...'; btn.disabled = true;
+            const res = await fetchAPI('saveSetting', { key: pageKey, value: htmlContent });
             
-            await fetchAPI('saveSetting', { key: pageKey, value: htmlContent });
-            
-            appState[pageKey] = htmlContent; // update state memory
+            if (res && res.success) {
+                appState[pageKey] = htmlContent;
+                alert('Halaman berhasil diperbarui!');
+            }
             btn.innerText = 'Simpan Halaman'; btn.disabled = false;
-            alert('Halaman berhasil diperbarui!');
         }
 
         function renderCPanelPengaturan(content) {
@@ -600,8 +604,11 @@
         
         async function saveCategoriesToDB() {
             const btn = document.getElementById('btn-savecat'); btn.innerText = 'Menyimpan...'; 
-            await fetchAPI('saveSetting', { key: 'categories_data', value: JSON.stringify(appState.categories) });
-            updateUI(); btn.innerText = 'Simpan Perubahan'; alert('Kategori berhasil disimpan!');
+            const res = await fetchAPI('saveSetting', { key: 'categories_data', value: JSON.stringify(appState.categories) });
+            if (res && res.success) {
+                updateUI(); alert('Kategori berhasil disimpan!');
+            }
+            btn.innerText = 'Simpan Perubahan'; 
         }
 
         function handleLogin(e) {
@@ -620,7 +627,9 @@
             const processSave = async (base64, fileType, fileName) => {
                 const articleData = { id: Date.now(), title: title, imageBase64: base64, filename: fileName, mimeType: fileType, excerpt: excerpt, content: content, date: new Date().toLocaleDateString('id-ID'), type: type };
                 const res = await fetchAPI('saveArticle', { data: articleData });
-                if (res) appState.articles.unshift(res);
+                if (res && res.id) {
+                    appState.articles.unshift(res);
+                }
                 switchCpanelTab('artikel');
             };
 
@@ -632,7 +641,16 @@
         }
 
         async function deleteArticle(id, btn) {
-            if(confirm('Yakin ingin menghapus artikel ini?')) { btn.innerHTML = '...'; await fetchAPI('deleteArticle', { id: id }); appState.articles = appState.articles.filter(a => a.id !== id); switchCpanelTab('artikel'); }
+            if(confirm('Yakin ingin menghapus artikel ini?')) { 
+                btn.innerHTML = '...'; 
+                const res = await fetchAPI('deleteArticle', { id: id }); 
+                if(res && res.success) {
+                    appState.articles = appState.articles.filter(a => a.id !== id); 
+                    switchCpanelTab('artikel'); 
+                } else {
+                    btn.innerHTML = '<i class="ph ph-trash text-lg"></i> Hapus';
+                }
+            }
         }
 
         async function saveDocument() {
@@ -644,14 +662,25 @@
             reader.onload = async (e) => {
                 const docData = { id: Date.now(), title: title, desc: desc, icon: icon, color: color, date: new Date().toLocaleDateString('id-ID'), fileBase64: e.target.result.split(',')[1], filename: fileInput.files[0].name, mimeType: fileInput.files[0].type };
                 const res = await fetchAPI('saveDocument', { data: docData });
-                if(res) appState.documents.unshift(res);
+                if(res && res.id) {
+                    appState.documents.unshift(res);
+                }
                 switchCpanelTab('dokumen');
             };
             reader.readAsDataURL(fileInput.files[0]);
         }
 
         async function deleteDocument(id, btn) {
-            if(confirm('Yakin ingin menghapus dokumen ini?')) { btn.innerHTML = '...'; await fetchAPI('deleteDocument', { id: id }); appState.documents = appState.documents.filter(d => d.id !== id); switchCpanelTab('dokumen'); }
+            if(confirm('Yakin ingin menghapus dokumen ini?')) { 
+                btn.innerHTML = '...'; 
+                const res = await fetchAPI('deleteDocument', { id: id }); 
+                if (res && res.success) {
+                    appState.documents = appState.documents.filter(d => d.id !== id); 
+                    switchCpanelTab('dokumen'); 
+                } else {
+                    btn.innerHTML = '<i class="ph ph-trash text-lg"></i> Hapus';
+                }
+            }
         }
 
         async function saveAllSettings() {
@@ -674,18 +703,21 @@
                 {key: 'footerCopyright', value: vals.footerCopyright}
             ];
 
-            await fetchAPI('saveMultipleSettings', { settings: payload });
+            const res = await fetchAPI('saveMultipleSettings', { settings: payload });
             
-            // Update UI State
-            appState.runningText = vals.runningText;
-            appState.footerWA = vals.footerWA;
-            appState.footerEmail = vals.footerEmail;
-            appState.footerPhone = vals.footerPhone;
-            appState.footerCopyright = vals.footerCopyright;
+            if (res && res.success) {
+                // Update UI State
+                appState.runningText = vals.runningText;
+                appState.footerWA = vals.footerWA;
+                appState.footerEmail = vals.footerEmail;
+                appState.footerPhone = vals.footerPhone;
+                appState.footerCopyright = vals.footerCopyright;
 
-            updateUI(); 
+                updateUI(); 
+                alert('Pengaturan web & footer berhasil disimpan!');
+            }
+            
             btn.innerText = 'Simpan Seluruh Pengaturan'; btn.disabled = false;
-            alert('Pengaturan web & footer berhasil disimpan!');
         }
 
         document.addEventListener('DOMContentLoaded', initApp);
