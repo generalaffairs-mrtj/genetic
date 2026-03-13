@@ -90,8 +90,7 @@
                             <img src="logo.png" alt="Logo" class="h-8 w-auto mr-3 object-contain" onerror="this.src='https://via.placeholder.com/32?text=G'; this.classList.add('rounded-full');">
                             <span class="font-semibold text-xl tracking-tight">GENETIC</span>
                         </div>
-                        <h3 class="text-3xl font-medium text-slate-900 mb-8 leading-tight pr-4">Sentralisasi Layanan<br>Fasilitas & Operasional.</h3>
-                        <button class="bg-primary text-white pl-6 pr-2 py-2 flex items-center text-sm font-medium hover:bg-slate-800 transition-colors w-fit">Hubungi Tim GA <span class="bg-white text-primary p-1.5 ml-4 flex items-center justify-center"><i class="ph ph-arrow-right font-bold"></i></span></button>
+                        <h3 class="text-3xl font-medium text-slate-900 mb-8 leading-tight pr-4">General Affairs<br>Information Center.</h3>
                     </div>
                     <div><h4 class="font-medium text-slate-900 mb-5 text-sm">Layanan GA</h4><ul class="space-y-4 text-sm text-slate-500"><li><a href="#" class="hover:text-primary transition-colors">Peminjaman Kendaraan</a></li><li><a href="#" class="hover:text-primary transition-colors">Ruang Rapat & Fasilitas</a></li><li><a href="#" class="hover:text-primary transition-colors">Permintaan ATK</a></li></ul></div>
                     <div><h4 class="font-medium text-slate-900 mb-5 text-sm">Informasi Terkini</h4><ul class="space-y-4 text-sm text-slate-500"><li><a href="#semua-informasi" class="hover:text-primary transition-colors">Berita Utama</a></li><li><a href="#semua-informasi" class="hover:text-primary transition-colors">Pengumuman</a></li><li><a href="#dokumen-penting" class="hover:text-primary transition-colors">SOP & Panduan</a></li></ul></div>
@@ -100,7 +99,6 @@
                         <ul class="space-y-4 text-sm text-slate-500">
                             <li><a href="#" id="footer-wa" class="hover:text-primary transition-colors flex items-center"><i class="ph ph-whatsapp-logo mr-2 text-lg"></i> Loading...</a></li>
                             <li><a href="#" id="footer-email" class="hover:text-primary transition-colors flex items-center"><i class="ph ph-envelope-simple mr-2 text-lg"></i> Loading...</a></li>
-                            <li><span id="footer-phone" class="flex items-center"><i class="ph ph-phone mr-2 text-lg"></i> Loading...</span></li>
                         </ul>
                     </div>
                 </div>
@@ -108,7 +106,6 @@
                     <div class="flex flex-wrap gap-4 md:gap-6">
                         <a href="#privacy-policy" class="hover:text-primary">Privacy Policy</a>
                         <a href="#terms-of-use" class="hover:text-primary">Terms of Use</a>
-                        <a href="#" class="hover:text-primary">Cookie Consent</a>
                     </div>
                     <div id="footer-copyright">© 2026 GENETIC (General Affairs).</div>
                 </div>
@@ -127,14 +124,14 @@
     <script>
         // ==========================================
         // KONFIGURASI PENTING UNTUK GITHUB / VERCEL
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxjj7szPGup-ie0eNHShrNF0xLAODJVvwr8g70Xnz470JazncN48FIHPFHQ_eA6VQut/exec';
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzICTc-tZtXmagJpZ5kSD-KcdhftpbSqziqzpUIOBsJdYz2JuEP31VGZUbpCQv7CjtQ/exec';
         // ==========================================
 
         let appState = {
             user: null, 
             articles: [], documents: [], categories: [], 
             runningText: "Menyambungkan ke database...",
-            footerWA: '', footerEmail: '', footerPhone: '', footerCopyright: '',
+            footerWA: '', footerEmail: '', footerCopyright: '',
             privacyPolicy: '', termsOfUse: ''
         };
 
@@ -197,7 +194,6 @@
                 // Footer & Info Pages
                 appState.footerWA = data.footerWA || '';
                 appState.footerEmail = data.footerEmail || '';
-                appState.footerPhone = data.footerPhone || '';
                 appState.footerCopyright = data.footerCopyright || '';
                 appState.privacyPolicy = data.privacyPolicy || '';
                 appState.termsOfUse = data.termsOfUse || '';
@@ -214,7 +210,6 @@
             // Update Dynamic Footer Elements
             document.getElementById('footer-wa').innerHTML = `<i class="ph ph-whatsapp-logo mr-2 text-lg"></i> ${appState.footerWA || '0812xxxx'}`;
             document.getElementById('footer-email').innerHTML = `<i class="ph ph-envelope-simple mr-2 text-lg"></i> ${appState.footerEmail || 'email@company.com'}`;
-            document.getElementById('footer-phone').innerHTML = `<i class="ph ph-phone mr-2 text-lg"></i> Ext: ${appState.footerPhone || '1234'}`;
             document.getElementById('footer-copyright').innerText = appState.footerCopyright || '© 2026 GENETIC.';
 
             renderNavbarCategories();
@@ -314,7 +309,7 @@
                             <span class="flex h-2 w-2 rounded-full bg-green-400 mr-2 animate-pulse"></span> Portal Resmi General Affairs
                         </div>
                         <h1 class="text-4xl md:text-7xl font-extrabold text-white tracking-tight mb-4 md:mb-6 leading-tight">GENETIC <br> <span class="text-transparent bg-clip-text bg-gradient-to-r from-secondary to-accent">General Affairs Information Center</span></h1>
-                        <p class="mt-2 md:mt-4 text-lg md:text-xl text-slate-300 max-w-3xl mb-8 md:mb-10 font-light px-4">GENETIC memberikan akses cepat dan terpadu ke seluruh layanan, kebijakan, dan pembaruan dari divisi General Affairs untuk mendukung produktivitas Anda.</p>
+                        <p class="mt-2 md:mt-4 text-lg md:text-xl text-slate-300 max-w-3xl mb-8 md:mb-10 font-light px-4">GENETIC merupakan portal informasi terintegrasi milik Departemen General Affairs.</p>
                     </div>
                 </div>
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
@@ -391,7 +386,7 @@
                     <div class="bg-white p-8 md:p-10 rounded-3xl shadow-2xl shadow-slate-200 max-w-md w-full border border-slate-100">
                         <div class="text-center mb-8"><div class="inline-flex justify-center items-center w-16 h-16 rounded-full bg-blue-50 text-secondary mb-4"><i class="ph ph-lock-key text-3xl"></i></div><h2 class="text-2xl font-bold text-primary">Login Portal</h2></div>
                         <form onsubmit="handleLogin(event)" class="space-y-6">
-                            <div><label class="block text-sm font-medium text-slate-700 mb-2">Username</label><input type="text" id="username" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-secondary outline-none" required placeholder="general00"></div>
+                            <div><label class="block text-sm font-medium text-slate-700 mb-2">Username</label><input type="text" id="username" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-secondary outline-none" required placeholder="Masukkan Username"></div>
                             <div><label class="block text-sm font-medium text-slate-700 mb-2">Password</label><input type="password" id="password" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-secondary outline-none" required placeholder="••••••••"></div>
                             <button type="submit" class="w-full bg-primary hover:bg-slate-800 text-white font-bold py-3.5 rounded-xl transition-colors shadow-lg">Masuk ke Sistem</button>
                         </form>
@@ -607,15 +602,9 @@
                             <input type="text" id="set-footer-email" value="${appState.footerEmail}" placeholder="email@company.com" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-secondary outline-none">
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-2">Telepon / Ext Footer</label>
-                            <input type="text" id="set-footer-phone" value="${appState.footerPhone}" placeholder="1234" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-secondary outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-2">Copyright Footer</label>
-                            <input type="text" id="set-footer-copyright" value="${appState.footerCopyright}" placeholder="© 2026..." class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-secondary outline-none">
-                        </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">Copyright Footer</label>
+                        <input type="text" id="set-footer-copyright" value="${appState.footerCopyright}" placeholder="© 2026..." class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-secondary outline-none">
                     </div>
                     <button id="btn-savesetting" onclick="saveAllSettings()" class="bg-primary text-white px-6 py-3 rounded-lg font-bold hover:bg-slate-800 w-full mt-4">Simpan Seluruh Pengaturan</button>
                 </div>
@@ -736,7 +725,6 @@
                 runningText: document.getElementById('set-running-text').value,
                 footerWA: document.getElementById('set-footer-wa').value,
                 footerEmail: document.getElementById('set-footer-email').value,
-                footerPhone: document.getElementById('set-footer-phone').value,
                 footerCopyright: document.getElementById('set-footer-copyright').value
             };
 
@@ -744,7 +732,6 @@
                 {key: 'runningText', value: vals.runningText},
                 {key: 'footerWA', value: vals.footerWA},
                 {key: 'footerEmail', value: vals.footerEmail},
-                {key: 'footerPhone', value: vals.footerPhone},
                 {key: 'footerCopyright', value: vals.footerCopyright}
             ];
 
@@ -755,7 +742,6 @@
                 appState.runningText = vals.runningText;
                 appState.footerWA = vals.footerWA;
                 appState.footerEmail = vals.footerEmail;
-                appState.footerPhone = vals.footerPhone;
                 appState.footerCopyright = vals.footerCopyright;
 
                 updateUI(); 
