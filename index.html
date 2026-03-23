@@ -9,6 +9,8 @@
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Supabase JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <script>
         tailwind.config = {
             theme: { extend: { colors: { primary: '#0f172a', secondary: '#3b82f6', accent: '#8b5cf6' }, fontFamily: { sans: ['Inter','sans-serif'] } } }
@@ -85,8 +87,8 @@
                     </div>
                     <h3 class="text-3xl font-medium text-slate-900 mb-8 leading-tight pr-4">General Affairs<br>Information Center.</h3>
                 </div>
-                <div><h4 class="font-medium text-slate-900 mb-5 text-sm">Layanan GA</h4><ul class="space-y-4 text-sm text-slate-500"><li><a href="#" class="hover:text-primary transition-colors">Peminjaman Kendaraan</a></li><li><a href="#" class="hover:text-primary transition-colors">Ruang Rapat & Fasilitas</a></li><li><a href="#" class="hover:text-primary transition-colors">Permintaan ATK</a></li></ul></div>
-                <div><h4 class="font-medium text-slate-900 mb-5 text-sm">Informasi Terkini</h4><ul class="space-y-4 text-sm text-slate-500"><li><a href="#semua-informasi" class="hover:text-primary transition-colors">Berita Utama</a></li><li><a href="#semua-informasi" class="hover:text-primary transition-colors">Pengumuman</a></li><li><a href="#dokumen-penting" class="hover:text-primary transition-colors">SOP & Panduan</a></li></ul></div>
+                <div><h4 class="font-medium text-slate-900 mb-5 text-sm">Layanan GA</h4><ul class="space-y-4 text-sm text-slate-500"><li><a href="#" class="hover:text-primary transition-colors">Peminjaman Kendaraan</a></li><li><a href="#" class="hover:text-primary transition-colors">Ruang Rapat &amp; Fasilitas</a></li><li><a href="#" class="hover:text-primary transition-colors">Permintaan ATK</a></li></ul></div>
+                <div><h4 class="font-medium text-slate-900 mb-5 text-sm">Informasi Terkini</h4><ul class="space-y-4 text-sm text-slate-500"><li><a href="#semua-informasi" class="hover:text-primary transition-colors">Berita Utama</a></li><li><a href="#semua-informasi" class="hover:text-primary transition-colors">Pengumuman</a></li><li><a href="#dokumen-penting" class="hover:text-primary transition-colors">SOP &amp; Panduan</a></li></ul></div>
                 <div>
                     <h4 class="font-medium text-slate-900 mb-5 text-sm">Connect</h4>
                     <ul class="space-y-4 text-sm text-slate-500">
@@ -113,15 +115,23 @@
 </div>
 
 <script>
-// ==========================================
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby-dU18J8U9x7X3XZ2egNKG-MNGG98gAntmRaLdcpi6nJ9sycHQ7rMi2efojJkJ2z2f/exec';
-// ==========================================
+// ============================================================
+// KONFIGURASI SUPABASE
+// Ganti kedua nilai di bawah dengan milik proyek Anda:
+//   Supabase Dashboard → Settings → API
+// ============================================================
+const SUPABASE_URL      = 'https://lcocbxzkisyeqmzqohub.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJjbXdveW1scHFyZmxibXR4Z29kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyNDc2MzQsImV4cCI6MjA4OTgyMzYzNH0.lRCV4FbWcyvfwAYXuFtIIRGr7GF8dM7ZM8yysQ5o-FY';
+// ============================================================
+
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const DOC_CATEGORIES = ['Pedoman/SOP', 'Surat Edaran', 'Instruksi Kerja', 'Dokumen Penting Lainnya'];
 
 let appState = {
-    user: null,          // role string: 'master' | 'admin' | null
-    currentUser: null,   // full user object
+    user: null,
+    currentUser: null,
     users: [],
     articles: [], documents: [], categories: [],
     runningText: "Menyambungkan ke database...",
@@ -131,7 +141,7 @@ let appState = {
 
 let quillEditor = null;
 let quillInfoEditor = null;
-let editingArticleId = null; // null=create, id=edit
+let editingArticleId = null;
 
 // ── Utilities ──────────────────────────────────────────────
 function formatDateID(d = new Date()) {
@@ -182,26 +192,18 @@ function makeQuillModules() {
                     input.onchange = async () => {
                         const file = input.files[0];
                         if (!file) return;
-
-                        // Tampilkan placeholder loading di posisi kursor
                         const range = quill.getSelection(true);
                         quill.insertText(range.index, '⏳ Mengupload gambar...', { 'color': '#94a3b8', 'italic': true });
                         quill.setSelection(range.index + 26);
-
                         const reader = new FileReader();
                         reader.onload = async (e) => {
                             const base64 = e.target.result.split(',')[1];
                             const res = await fetchAPI('uploadImage', {
                                 data: { imageBase64: base64, mimeType: file.type, filename: 'inline_' + Date.now() + '_' + file.name }
                             });
-
-                            // Hapus teks placeholder
                             const currentContent = quill.getText();
                             const placeholderIdx = currentContent.indexOf('⏳ Mengupload gambar...');
-                            if (placeholderIdx !== -1) {
-                                quill.deleteText(placeholderIdx, 26);
-                            }
-
+                            if (placeholderIdx !== -1) quill.deleteText(placeholderIdx, 26);
                             if (res && res.url) {
                                 const insertAt = placeholderIdx !== -1 ? placeholderIdx : quill.getSelection(true).index;
                                 quill.insertEmbed(insertAt, 'image', res.url);
@@ -218,26 +220,181 @@ function makeQuillModules() {
     };
 }
 
-// ── API ────────────────────────────────────────────────────
-async function fetchAPI(action, payload = null) {
-    if (!APPS_SCRIPT_URL) { console.warn("URL belum diatur"); return null; }
+// ── Supabase Storage Helper ────────────────────────────────
+async function uploadToStorage(bucket, base64Data, mimeType, filename) {
+    // Konversi base64 ke Blob
+    const binary = atob(base64Data);
+    const array  = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) array[i] = binary.charCodeAt(i);
+    const blob = new Blob([array], { type: mimeType });
+
+    // Buat nama file unik agar tidak bertabrakan
+    const safeName = filename.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const path = `${Date.now()}_${safeName}`;
+
+    const { error } = await db.storage.from(bucket).upload(path, blob, { contentType: mimeType });
+    if (error) throw new Error('Upload storage gagal: ' + error.message);
+
+    return db.storage.from(bucket).getPublicUrl(path).data.publicUrl;
+}
+
+// ── API (Supabase) ─────────────────────────────────────────
+async function fetchAPI(action, payload = {}) {
     try {
+        // ── getInitialData ─────────────────────────────────
         if (action === 'getInitialData') {
-            const res = await fetch(`${APPS_SCRIPT_URL}?action=getInitialData&t=${Date.now()}`);
-            return await res.json();
-        } else {
-            const res = await fetch(APPS_SCRIPT_URL, {
-                method: 'POST', redirect: 'follow',
-                body: JSON.stringify({ action, ...payload }),
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-            });
-            const data = await res.json();
-            if (data && data.error) { console.error('Server error:', data.error); alert('Error: ' + data.error); return null; }
-            return data;
+            const [artRes, docRes, setRes, usrRes] = await Promise.all([
+                db.from('articles').select('*').order('id', { ascending: false }),
+                db.from('documents').select('*').order('id', { ascending: false }),
+                db.from('settings').select('*'),
+                db.from('users').select('*')
+            ]);
+
+            const settingsMap = {};
+            (setRes.data || []).forEach(s => { settingsMap[s.key] = s.value; });
+
+            let categories = null;
+            if (settingsMap.categories_data) {
+                try { categories = JSON.parse(settingsMap.categories_data); } catch (e) {}
+            }
+            if (!categories) categories = [
+                { id: 1, name: 'Kategori A', subs: [{ name: 'Sub A1', url: '#' }] },
+                { id: 2, name: 'Kategori B', subs: [] }
+            ];
+
+            return {
+                articles: (artRes.data || []).map(a => ({
+                    id: a.id, title: a.title, image: a.image_url,
+                    excerpt: a.excerpt, content: a.content, date: a.date, type: a.type || 'Informasi'
+                })),
+                documents: (docRes.data || []).map(d => ({
+                    id: d.id, title: d.title, desc: d.description, icon: d.icon,
+                    color: d.color, fileUrl: d.file_url, date: d.date,
+                    category: d.category || 'Dokumen Penting Lainnya'
+                })),
+                users: (usrRes.data || []).map(u => ({
+                    id: u.id, displayName: u.display_name, username: u.username,
+                    password: u.password, role: u.role
+                })),
+                categories,
+                runningText:     settingsMap.runningText     || 'Selamat Datang di Portal GENETIC',
+                footerWA:        settingsMap.footerWA        || '',
+                footerEmail:     settingsMap.footerEmail     || '',
+                footerCopyright: settingsMap.footerCopyright || '© 2026 GENETIC (General Affairs). All rights reserved.',
+                privacyPolicy:   settingsMap.privacyPolicy   || '<p>Kebijakan Privasi perusahaan akan ditampilkan di sini.</p>',
+                termsOfUse:      settingsMap.termsOfUse      || '<p>Syarat dan Ketentuan layanan akan ditampilkan di sini.</p>'
+            };
         }
+
+        // ── uploadImage ────────────────────────────────────
+        if (action === 'uploadImage') {
+            const d = payload.data;
+            const url = await uploadToStorage('images', d.imageBase64, d.mimeType, d.filename);
+            return { url };
+        }
+
+        // ── saveArticle ────────────────────────────────────
+        if (action === 'saveArticle') {
+            const d = payload.data;
+            let imageUrl = 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=600&q=80';
+            if (d.imageBase64) imageUrl = await uploadToStorage('images', d.imageBase64, d.mimeType, d.filename);
+
+            const { data: row, error } = await db.from('articles').insert({
+                id: d.id, title: d.title, image_url: imageUrl,
+                excerpt: d.excerpt, content: d.content, date: d.date, type: d.type
+            }).select().single();
+            if (error) { alert('Error: ' + error.message); return null; }
+            return { id: row.id, title: row.title, image: row.image_url, excerpt: row.excerpt, content: row.content, date: row.date, type: row.type };
+        }
+
+        // ── updateArticle ──────────────────────────────────
+        if (action === 'updateArticle') {
+            const d = payload.data;
+            const { data: existing } = await db.from('articles').select('image_url').eq('id', d.id).single();
+            let imageUrl = existing ? existing.image_url : '';
+            if (d.imageBase64) imageUrl = await uploadToStorage('images', d.imageBase64, d.mimeType, d.filename);
+
+            const { data: row, error } = await db.from('articles').update({
+                title: d.title, image_url: imageUrl, excerpt: d.excerpt, content: d.content, type: d.type
+            }).eq('id', d.id).select().single();
+            if (error) { alert('Error: ' + error.message); return null; }
+            return { id: row.id, title: row.title, image: row.image_url, excerpt: row.excerpt, content: row.content, date: row.date, type: row.type };
+        }
+
+        // ── deleteArticle ──────────────────────────────────
+        if (action === 'deleteArticle') {
+            const { error } = await db.from('articles').delete().eq('id', payload.id);
+            return { success: !error };
+        }
+
+        // ── saveDocument ───────────────────────────────────
+        if (action === 'saveDocument') {
+            const d = payload.data;
+            let fileUrl = '#';
+            if (d.fileBase64) fileUrl = await uploadToStorage('documents', d.fileBase64, d.mimeType, d.filename);
+
+            const { data: row, error } = await db.from('documents').insert({
+                id: d.id, title: d.title, description: d.desc, icon: d.icon,
+                color: d.color, file_url: fileUrl, date: d.date,
+                category: d.category || 'Dokumen Penting Lainnya'
+            }).select().single();
+            if (error) { alert('Error: ' + error.message); return null; }
+            return { id: row.id, title: row.title, desc: row.description, icon: row.icon, color: row.color, fileUrl: row.file_url, date: row.date, category: row.category };
+        }
+
+        // ── deleteDocument ─────────────────────────────────
+        if (action === 'deleteDocument') {
+            const { error } = await db.from('documents').delete().eq('id', payload.id);
+            return { success: !error };
+        }
+
+        // ── saveSetting ────────────────────────────────────
+        if (action === 'saveSetting') {
+            const { error } = await db.from('settings')
+                .upsert({ key: payload.key, value: payload.value }, { onConflict: 'key' });
+            return { success: !error };
+        }
+
+        // ── saveMultipleSettings ───────────────────────────
+        if (action === 'saveMultipleSettings') {
+            const rows = payload.settings.map(s => ({ key: s.key, value: s.value }));
+            const { error } = await db.from('settings').upsert(rows, { onConflict: 'key' });
+            return { success: !error };
+        }
+
+        // ── saveUser ───────────────────────────────────────
+        if (action === 'saveUser') {
+            const d = payload.data;
+            if (d.id) {
+                // Update user yang ada
+                const update = { display_name: d.displayName, username: d.username, role: d.role };
+                if (d.password) update.password = d.password;
+                const { data: row, error } = await db.from('users').update(update).eq('id', d.id).select().single();
+                if (error) { alert('Error: ' + error.message); return null; }
+                return { id: row.id, displayName: row.display_name, username: row.username, role: row.role };
+            } else {
+                // Buat user baru
+                const newId = Date.now();
+                const { data: row, error } = await db.from('users').insert({
+                    id: newId, display_name: d.displayName, username: d.username,
+                    password: d.password, role: d.role
+                }).select().single();
+                if (error) { alert('Error: ' + error.message); return null; }
+                return { id: row.id, displayName: row.display_name, username: row.username, role: row.role };
+            }
+        }
+
+        // ── deleteUser ─────────────────────────────────────
+        if (action === 'deleteUser') {
+            const { error } = await db.from('users').delete().eq('id', payload.id);
+            return { success: !error };
+        }
+
+        return { error: 'Action tidak dikenal: ' + action };
+
     } catch (err) {
-        console.error('Fetch error:', err);
-        alert('Gagal menghubungi server. Pastikan URL Apps Script benar dan di-deploy sebagai Anyone.');
+        console.error('Supabase error [' + action + ']:', err);
+        alert('Error: ' + err.message);
         return null;
     }
 }
@@ -247,13 +404,13 @@ async function initApp() {
     document.getElementById('footer-running-text').innerHTML = `<span><i class="ph-fill ph-spinner animate-spin text-secondary mr-2"></i> Memuat data...</span>`;
     const data = await fetchAPI('getInitialData');
     if (data) {
-        appState.articles     = data.articles || [];
-        appState.documents    = data.documents || [];
-        appState.categories   = data.categories || [];
-        appState.users        = data.users || [];
-        appState.runningText  = data.runningText || '';
-        appState.footerWA     = data.footerWA || '';
-        appState.footerEmail  = data.footerEmail || '';
+        appState.articles        = data.articles || [];
+        appState.documents       = data.documents || [];
+        appState.categories      = data.categories || [];
+        appState.users           = data.users || [];
+        appState.runningText     = data.runningText || '';
+        appState.footerWA        = data.footerWA || '';
+        appState.footerEmail     = data.footerEmail || '';
         appState.footerCopyright = data.footerCopyright || '';
         appState.privacyPolicy   = data.privacyPolicy || '';
         appState.termsOfUse      = data.termsOfUse || '';
@@ -380,7 +537,6 @@ function renderDocCard(doc) {
 }
 
 function renderDokumenPenting(container) {
-    // Group by category
     const grouped = {};
     DOC_CATEGORIES.forEach(cat => grouped[cat] = []);
     appState.documents.forEach(doc => {
@@ -428,7 +584,6 @@ function renderArticleDetail(container, id) {
             <h1 class="text-3xl md:text-4xl font-extrabold text-primary mb-6 leading-tight">${article.title}</h1>
             <div class="prose prose-base md:prose-lg max-w-none text-slate-600 prose-headings:text-primary prose-a:text-secondary article-content">${article.content}</div>
         </div>`;
-    // Add zoom to inline images in content
     setTimeout(() => {
         container.querySelectorAll('.article-content img').forEach(img => {
             img.onclick = () => openImageZoom(img.src);
@@ -787,7 +942,7 @@ function closeUserForm() {
 }
 
 async function saveUser() {
-    const id = document.getElementById('user-edit-id').value;
+    const id          = document.getElementById('user-edit-id').value;
     const displayName = document.getElementById('user-displayname').value.trim();
     const username    = document.getElementById('user-username').value.trim();
     const password    = document.getElementById('user-password').value;
@@ -956,7 +1111,7 @@ async function saveInfoPage() {
 // ── CPanel: Pengaturan ─────────────────────────────────────
 function renderCPanelPengaturan(content) {
     content.innerHTML = `
-        <h2 class="text-xl md:text-2xl font-bold text-primary mb-6">Pengaturan Web & Footer</h2>
+        <h2 class="text-xl md:text-2xl font-bold text-primary mb-6">Pengaturan Web &amp; Footer</h2>
         <div class="space-y-6 max-w-2xl bg-slate-50 p-6 rounded-xl border border-slate-100">
             <div><label class="block text-sm font-medium text-slate-700 mb-2">Running Text (Bawah Web)</label>
                 <textarea id="set-running-text" rows="2" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-secondary outline-none">${appState.runningText}</textarea></div>
@@ -972,10 +1127,10 @@ function renderCPanelPengaturan(content) {
 async function saveAllSettings() {
     const btn = document.getElementById('btn-savesetting'); btn.innerText = 'Menyimpan...'; btn.disabled = true;
     const vals = {
-        runningText:    document.getElementById('set-running-text').value,
-        footerWA:       document.getElementById('set-footer-wa').value,
-        footerEmail:    document.getElementById('set-footer-email').value,
-        footerCopyright:document.getElementById('set-footer-copyright').value
+        runningText:     document.getElementById('set-running-text').value,
+        footerWA:        document.getElementById('set-footer-wa').value,
+        footerEmail:     document.getElementById('set-footer-email').value,
+        footerCopyright: document.getElementById('set-footer-copyright').value
     };
     const res = await fetchAPI('saveMultipleSettings', { settings: Object.entries(vals).map(([key,value]) => ({key,value})) });
     if (res && res.success) {
